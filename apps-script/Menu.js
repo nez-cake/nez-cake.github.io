@@ -162,6 +162,19 @@ function menuCheckSettings() {
 
 // ---------- 아이폰 연결 정보 ----------
 
+// 손님 주문 페이지(web/config.js API_URL)와 같은 공개 주소. 비밀 값이 아니다.
+// 배포를 새로 만들어 주소가 바뀌면 Script Properties의 WEB_APP_URL에 새 주소를 넣는다.
+var DEFAULT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwzq_wLIRRHazflWEm0u3WvLIG3vqiv9N0nURFxpwHqEOeYdxCpK3wGJbwTUAZCO18crA/exec';
+
+/**
+ * 단축어가 보낼 웹 앱 주소. WEB_APP_URL 속성 → 코드 기본값 순서.
+ * ScriptApp.getService().getUrl()은 실제 배포가 아닌 주소를 돌려줄 때가 있어 쓰지 않는다.
+ */
+function webAppUrl_() {
+  var url = String(getProp_('WEB_APP_URL') || DEFAULT_WEB_APP_URL).trim();
+  return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url) ? url : '';
+}
+
 /**
  * 아이폰 단축어에 넣을 웹 앱 주소와 입금 토큰을 창 하나에 보여 준다(복사 버튼 포함).
  * 토큰은 이 창에만 보이고 시트, 로그, 메일 어디에도 남기지 않는다.
@@ -176,9 +189,8 @@ function menuShowPhoneLink() {
     props.setProperty('DEPOSIT_TOKEN', token);
   }
 
-  var url = '';
-  try { url = ScriptApp.getService().getUrl() || ''; } catch (e) { url = ''; }
-  var urlOk = /\/exec$/.test(url);
+  var url = webAppUrl_();
+  var urlOk = !!url;
 
   var esc = function (s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
