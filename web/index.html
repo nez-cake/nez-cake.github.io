@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f4ec">
+  <meta name="format-detection" content="telephone=no">
+  <title>크리스마스 홀케이크 예약</title>
+  <meta name="description" content="크리스마스 홀케이크 예약 · 12월 23·24·25일 픽업">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+  <header class="top">
+    <div class="top-in">
+      <button type="button" class="back" id="backBtn" aria-label="처음 화면으로" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <a href="#" class="logo" id="logo" aria-label="처음 화면으로">
+        <span class="logo-name" id="logoName">&nbsp;</span>
+        <span class="logo-sub" id="logoSub"></span>
+      </a>
+      <a href="#lookup" class="top-link">주문 조회</a>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- 불러오는 중 / 오류 -->
+    <section class="screen screen-center" data-screen="loading" aria-busy="true">
+      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="muted">예약 정보를 불러오고 있어요</p>
+    </section>
+
+    <section class="screen screen-center" data-screen="error" hidden>
+      <p class="kicker">Sorry</p>
+      <h1 class="h-lg">페이지를 불러오지 못했어요</h1>
+      <p class="muted" id="loadErrorMsg">인터넷 연결을 확인하고 다시 시도해 주세요.</p>
+      <button type="button" class="btn btn-solid" id="retryLoad">다시 불러오기</button>
+    </section>
+
+    <!-- 1. 소개 -->
+    <section class="screen" data-screen="intro" hidden aria-labelledby="introTitle">
+      <div class="intro">
+        <div class="intro-photo" id="heroPhoto"></div>
+        <div class="intro-text">
+          <p class="kicker" id="introKicker"></p>
+          <h1 class="h-xl" id="introTitle"></h1>
+          <p class="lead" id="introLead"></p>
+
+          <ul class="cakes" id="cakeList"></ul>
+
+          <div class="datebox" id="introDates" role="list" aria-label="날짜별 예약 현황"></div>
+          <p class="note" id="introNote"></p>
+
+          <p class="closed" id="closedNotice" role="status" hidden></p>
+          <a href="#form" class="btn btn-solid btn-block" id="startOrder">예약하기</a>
+
+          <ol class="steps">
+            <li><i>1</i><span>날짜와 시간을 고르고 연락처를 남겨 주세요.</span></li>
+            <li><i>2</i><span>안내되는 계좌로 입금 마감 전까지 이체해 주세요.</span></li>
+            <li><i>3</i><span>입금이 확인되면 주문 조회 화면이 "예약 확정"으로 바뀌어요.</span></li>
+          </ol>
+        </div>
+      </div>
+      <figure class="story" id="story" hidden>
+        <div class="story-photo" id="storyPhoto"></div>
+        <figcaption class="story-text">
+          <span class="story-title">Made in small batches</span>
+          하루에 만들 수 있는 만큼만 예약을 받아요. 마감된 날짜는 예약 화면 달력에 바로 표시돼요.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- 2. 주문서 -->
+    <section class="screen" data-screen="form" hidden aria-labelledby="formTitle">
+      <form id="orderForm" class="form-wrap" novalidate autocomplete="on">
+        <div class="form-head">
+          <p class="kicker">Reservation</p>
+          <h1 class="h-lg" id="formTitle">예약하기</h1>
+          <p class="muted" id="formSub"></p>
+        </div>
+
+        <div class="form-main">
+          <fieldset class="sec" data-field="productId" id="cakeField" aria-describedby="err-productId" hidden>
+            <legend class="sec-t"><b>케이크</b></legend>
+            <div class="cake-choices" id="cakeChoices"></div>
+            <p class="err" id="err-productId"></p>
+          </fieldset>
+
+          <fieldset class="sec" data-field="pickupDate" aria-describedby="err-pickupDate">
+            <legend class="sec-t"><b>픽업 날짜</b><span id="dateHint"></span></legend>
+            <div id="calendars"></div>
+            <p class="err" id="err-pickupDate"></p>
+          </fieldset>
+
+          <fieldset class="sec" data-field="pickupTime" aria-describedby="err-pickupTime">
+            <legend class="sec-t"><b>픽업 시간</b><span id="timeHint"></span></legend>
+            <div class="times" id="timeChoices"></div>
+            <p class="err" id="err-pickupTime"></p>
+          </fieldset>
+
+          <div class="sec">
+            <h2 class="sec-t"><b>주문하시는 분</b></h2>
+
+            <div class="field" data-field="customerName">
+              <label for="customerName">성함</label>
+              <input class="input" id="customerName" name="customerName" type="text" maxlength="20" autocomplete="name" enterkeyhint="next" aria-describedby="err-customerName depositorNote">
+              <p class="hint" id="depositorNote">입금자명도 이 성함으로 들어가요. <b>이 이름 그대로 입금해야 자동 확정됩니다.</b></p>
+              <p class="err" id="err-customerName"></p>
+            </div>
+
+            <details class="depositor" id="depositorDetails">
+              <summary><span>입금자명이 다른가요?</span></summary>
+              <div class="field" data-field="depositorName">
+                <label for="depositorName">입금자명</label>
+                <input class="input" id="depositorName" name="depositorName" type="text" maxlength="20" enterkeyhint="next" aria-describedby="err-depositorName depositorCallout">
+                <p class="callout" id="depositorCallout">통장에 찍히는 이름(가족 명의 등)을 적어 주세요. 이 이름 그대로 입금해야 자동 확정됩니다.</p>
+                <p class="err" id="err-depositorName"></p>
+              </div>
+            </details>
+
+            <div class="field" data-field="phone">
+              <label for="phone">연락처</label>
+              <input class="input" id="phone" name="phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="tel" enterkeyhint="done" placeholder="010-0000-0000" aria-describedby="err-phone">
+              <p class="err" id="err-phone"></p>
+            </div>
+
+            <div class="field" data-field="qty">
+              <span class="label" id="qtyLabel">케이크 개수</span>
+              <div class="qty" role="group" aria-labelledby="qtyLabel" aria-describedby="qtyHint">
+                <button type="button" id="qtyMinus" aria-label="한 개 줄이기">−</button>
+                <output id="qtyValue" aria-live="polite">1</output>
+                <button type="button" id="qtyPlus" aria-label="한 개 늘리기">+</button>
+              </div>
+              <p class="hint" id="qtyHint"></p>
+              <p class="err" id="err-qty"></p>
+            </div>
+
+            <div class="field" data-field="lettering" id="letteringField" hidden>
+              <label for="lettering">레터링 문구 <span class="opt">선택</span></label>
+              <input class="input" id="lettering" name="lettering" type="text" aria-describedby="letteringHint err-lettering">
+              <p class="hint" id="letteringHint"><span id="letteringCount">0</span> / <span id="letteringMax">20</span>자</p>
+              <p class="err" id="err-lettering"></p>
+            </div>
+          </div>
+
+          <div class="sec" data-field="agreePrivacy">
+            <label class="agree">
+              <input type="checkbox" id="agreePrivacy" name="agreePrivacy" aria-describedby="privacyText err-agreePrivacy">
+              <span class="box" aria-hidden="true"></span>
+              <span>개인정보 수집·이용에 동의합니다 <em>(필수)</em>
+                <small id="privacyText"></small>
+              </span>
+            </label>
+            <p class="err" id="err-agreePrivacy"></p>
+          </div>
+
+          <p class="form-error" id="formError" role="alert" hidden></p>
+        </div>
+
+        <aside class="summary" aria-label="주문 요약">
+          <div class="sum-total">
+            <span class="sum-label">결제 금액</span>
+            <span class="sum-meta" id="barMeta">결제 금액</span>
+            <strong id="totalAmount">0원</strong>
+          </div>
+          <dl class="sum-detail">
+            <div><dt>케이크</dt><dd id="sumCake">-</dd></div>
+            <div><dt>픽업</dt><dd id="sumPickup">날짜와 시간을 골라 주세요</dd></div>
+            <div><dt>입금자명</dt><dd id="sumDepositor">-</dd></div>
+          </dl>
+          <button type="submit" class="btn btn-solid" id="submitBtn">주문하기</button>
+        </aside>
+      </form>
+    </section>
+
+    <!-- 3. 입금 안내 / 주문 상태 -->
+    <section class="screen" data-screen="order" hidden>
+      <div id="orderView" class="order-wrap"></div>
+    </section>
+
+    <!-- 4. 주문 조회 -->
+    <section class="screen" data-screen="lookup" hidden aria-labelledby="lookupTitle">
+      <div class="lookup-wrap">
+        <p class="kicker">Find my order</p>
+        <h1 class="h-lg" id="lookupTitle">주문 조회</h1>
+        <p class="muted">주문번호와 주문할 때 적은 연락처 뒷 4자리를 입력해 주세요.</p>
+        <form id="lookupForm" novalidate>
+          <div class="field" data-field="orderId">
+            <label for="lookupOrderId">주문번호</label>
+            <input class="input input-code" id="lookupOrderId" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="C-1224-A7K2" aria-describedby="err-orderId">
+            <p class="err" id="err-orderId"></p>
+          </div>
+          <div class="field" data-field="phone4">
+            <label for="lookupPhone4">연락처 뒷 4자리</label>
+            <input class="input input-code" id="lookupPhone4" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" aria-describedby="err-phone4">
+            <p class="err" id="err-phone4"></p>
+          </div>
+          <p class="form-error" id="lookupError" role="alert" hidden></p>
+          <button type="submit" class="btn btn-solid btn-block" id="lookupBtn">조회하기</button>
+        </form>
+        <div class="recent" id="recentOrders" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" id="footer" hidden>
+    <div class="footer-in">
+      <p class="footer-logo" id="footName"></p>
+      <dl class="footer-biz" id="footBiz"></dl>
+      <div class="footer-policy" id="footPolicy">
+        <p class="footer-label">환불·변경 규정</p>
+        <p id="footRefund"></p>
+      </div>
+      <a class="footer-insta" id="footInsta" href="#" target="_blank" rel="noopener" hidden>Instagram</a>
+    </div>
+  </footer>
+
+  <!-- 복사 대체용 시트 (클립보드가 막힌 브라우저) -->
+  <div class="sheet" id="copySheet" hidden>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="copySheetTitle">
+      <p class="sheet-title" id="copySheetTitle">길게 눌러 복사해 주세요</p>
+      <input class="input input-code" id="copySheetInput" type="text" readonly aria-labelledby="copySheetTitle">
+      <button type="button" class="btn btn-line btn-block" id="copySheetClose">닫기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="mock/mock-api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

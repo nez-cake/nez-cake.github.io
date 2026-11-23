@@ -1,0 +1,1 @@
+{ "ok": false, "error": { "code": "NOT_FOUND", "message": "주문번호와 전화번호 뒷 4자리가 맞는 주문을 찾지 못했어요." } }

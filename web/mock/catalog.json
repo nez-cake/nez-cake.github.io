@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "data": {
+    "cafe": {
+      "name": "Nez",
+      "tagline": "크리스마스 홀케이크 예약",
+      "instagramUrl": "https://www.instagram.com/nez.parfait/",
+      "heroImageUrl": ""
+    },
+    "products": [
+      {
+        "productId": "P1",
+        "name": "크리스마스 딸기 초코 홀케이크",
+        "price": 38000,
+        "description": "가격·사이즈 임시",
+        "imageUrl": ""
+      }
+    ],
+    "pickupDates": [
+      "2026-12-23",
+      "2026-12-24",
+      "2026-12-25"
+    ],
+    "pickupTimes": [
+      "12:00",
+      "12:30",
+      "13:00",
+      "13:30",
+      "14:00",
+      "14:30",
+      "15:00",
+      "15:30",
+      "16:00",
+      "16:30",
+      "17:00",
+      "17:30",
+      "18:00",
+      "18:30",
+      "19:00",
+      "19:30",
+      "20:00"
+    ],
+    "availability": {
+      "2026-12-23": {
+        "P1": 3
+      },
+      "2026-12-24": {
+        "P1": 7
+      },
+      "2026-12-25": {
+        "P1": 0
+      }
+    },
+    "maxQtyPerOrder": 2,
+    "lettering": {
+      "enabled": false,
+      "maxLength": 20
+    },
+    "account": {
+      "bankName": "토스뱅크",
+      "accountNumber": "0000-0000-0000",
+      "accountHolder": "예금주"
+    },
+    "order": {
+      "isOpen": true,
+      "openAt": "2026-12-01T10:00:00+09:00",
+      "closeAt": "2026-12-21T23:59:00+09:00",
+      "depositDeadlineHours": 24
+    },
+    "business": {
+      "name": "상호",
+      "owner": "대표자",
+      "regNo": "000-00-00000",
+      "address": "주소",
+      "phone": "010-0000-0000"
+    },
+    "policies": {
+      "refund": "픽업 3일 전까지 전액 환불, 이후 환불 불가 (임시)",
+      "privacy": "수집 항목: 이름, 전화번호, 이메일(선택) / 목적: 예약 확인과 픽업 안내 / 보관: 픽업 종료 후 환불 문의 기간까지"
+    }
+  }
+}
