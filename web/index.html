@@ -10,7 +10,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!--
+    버전 꼬리표 규칙 (예전 파일이 브라우저에 남아 화면이 깨지는 것을 막는다)
+    - styles.css, config.js, mock/mock-api.js, app.js 를 고치면, 아래 네 주소의 ?v= 값을 모두 새 값으로 올린다.
+    - 값은 "날짜 + 알파벳" 형식: 20261123b → 같은 날 다시 고치면 20261123c, 다음 날이면 20261124a.
+    - 네 파일 모두 같은 값을 쓴다. 하나만 고쳐도 네 개를 함께 올린다(헷갈리지 않게).
+    - index.html 자체에는 꼬리표를 붙일 수 없다. GitHub Pages는 파일을 10분쯤 캐시하므로, 배포 직후 10분 안에는 예전 화면이 보일 수 있다(그래도 짝이 맞는 파일끼리 열려 깨지지 않는다).
+  -->
+  <link rel="stylesheet" href="styles.css?v=20261123b">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -233,8 +240,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js"></script>
-  <script src="mock/mock-api.js"></script>
-  <script src="app.js"></script>
+  <script src="config.js?v=20261123b"></script>
+  <script src="mock/mock-api.js?v=20261123b"></script>
+  <script src="app.js?v=20261123b"></script>
 </body>
 </html>
