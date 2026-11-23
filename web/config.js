@@ -8,8 +8,8 @@
  * 가격·수량·날짜·계좌 같은 운영 값은 여기가 아니라 시트 Config 탭(catalog 응답)에서 온다.
  */
 window.APP_CONFIG = {
-  API_URL: "",
-  MOCK: true,
+  API_URL: "https://script.google.com/macros/s/AKfycbwzq_wLIRRHazflWEm0u3WvLIG3vqiv9N0nURFxpwHqEOeYdxCpK3wGJbwTUAZCO18crA/exec",
+  MOCK: false,
 
   // 화면 꾸밈 (운영 값 아님). 사진은 web/assets/의 같은 이름 파일을 바꾸면 교체된다.
   BRAND: {
