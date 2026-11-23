@@ -17,7 +17,7 @@
 | 케이크 | 케이크 이름·가격·"판매 중" 체크박스 |
 | 설정 | "항목 · 값 · 설명" 세 열. 값 칸(노란색)만 고친다 |
 
-시트 위쪽 **예약 관리** 메뉴: 선택한 주문 확정하기 / 선택한 주문 취소하기 / 오늘 픽업 명단 보기 / 주문 받기 시작·중지 / 설정 점검 / 시트 모양 다시 정리하기.
+시트 위쪽 **예약 관리** 메뉴: 선택한 주문 확정하기 / 선택한 주문 취소하기 / 오늘 픽업 명단 보기 / 주문 받기 시작·중지 / 설정 점검 / 아이폰 연결 정보 보기 / 시트 모양 다시 정리하기.
 
 코드는 한글 머리글을 내부 키(orderId 등)로 바꿔 읽는다. 열 순서를 바꿔도 되지만 **머리글 글자는 바꾸면 안 된다**(보호 경고가 뜬다). 내부 키 목록은 `apps-script/Common.js`의 `COLUMNS`, 설정 항목은 `apps-script/Setup.js`의 `CONFIG_ITEMS`.
 
@@ -137,7 +137,7 @@ git checkout -- appsscript.json; clasp push -f
 
   ```powershell
   $token = Read-Host "DEPOSIT_TOKEN"
-  $body = @{ action="deposit"; token=$token; title="테스트 알림"; body="테스트님이 38,000원을 입금했어요"; receivedAt=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json
+  $body = @{ action="deposit"; token=$token; title="60,000원 입금"; body="테스트 -> 내 토스뱅크 통장"; receivedAt=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json
   Invoke-RestMethod -Uri $url -Method Post -ContentType "application/json" -Body ([Text.Encoding]::UTF8.GetBytes($body)) | ConvertTo-Json
   ```
 
@@ -157,6 +157,10 @@ git checkout -- appsscript.json; clasp push -f
 
 1. 설정 탭에 실제 계좌·예금주·사장님 이메일·수량·가게 정보를 넣고 메뉴 **설정 점검**으로 확인.
 2. 1원 테스트로 알림 해석이 확인되면 "입금 자동 확정"을 켜고, 원하면 "입금 기한(시간)"을 줄인다.
+   - 아이폰 단축어의 URL과 `token` 값은 시트 메뉴 **예약 관리 → 아이폰 연결 정보 보기**에서 복사한다(복사 버튼). 토큰이 없으면 이 메뉴가 새로 만들지 물어본다. 이 창은 처음 열 때 "화면 표시" 권한을 한 번 더 묻는다.
+   - 자동 확정은 실제 토스 알림 두 줄("60,000원 입금" / "홍길동 -> 내 토스뱅크 통장")에서 이름과 금액이 모두 맞고, 그 이름·금액의 "입금대기" 주문이 딱 1건일 때만 한다. 이름이 가려진 알림(1원 입금의 `****`), 맞는 주문이 없거나 여러 건, 이미 만료된 주문은 확정하지 않고 "미매칭"으로 두고 사장님에게 메일을 보낸다.
+   - 2분 안에 똑같은 알림이 다시 오면 한 번만 처리한다. 같은 사람이 같은 금액을 2분 안에 두 번 보내면 두 번째는 "무시"로 남으니, 그런 경우는 시트에서 직접 확정한다.
+   - 토큰이 새어 나갔으면 편집기에서 `rotateDepositToken`을 실행한 뒤 메뉴에서 새 토큰을 복사해 단축어를 고친다.
 3. `TEST100`(100원 테스트 상품)은 끝에서 끝까지 테스트 후 "판매 중" 체크를 끈다.
 
 ## 12. 픽업 이후 개인정보 삭제

@@ -11,6 +11,7 @@ function onOpen() {
     .addItem('오늘 픽업 명단 보기', 'menuShowTodayPickup')
     .addItem('주문 받기 시작 / 중지', 'menuToggleOrders')
     .addItem('설정 점검', 'menuCheckSettings')
+    .addItem('아이폰 연결 정보 보기', 'menuShowPhoneLink')
     .addSeparator()
     .addItem('시트 모양 다시 정리하기', 'menuSetupSheets')
     .addToUi();
@@ -157,6 +158,54 @@ function menuCheckSettings() {
   msg += r.problems.length ? '고칠 것\n- ' + r.problems.join('\n- ') : '고칠 것이 없어요.';
   msg += '\n\n지금 상태\n- ' + r.info.join('\n- ');
   alert_(msg);
+}
+
+// ---------- 아이폰 연결 정보 ----------
+
+/**
+ * 아이폰 단축어에 넣을 웹 앱 주소와 입금 토큰을 창 하나에 보여 준다(복사 버튼 포함).
+ * 토큰은 이 창에만 보이고 시트, 로그, 메일 어디에도 남기지 않는다.
+ * 이 메뉴를 열 수 있는 사람(시트 편집자)은 원래 편집기에서도 토큰을 볼 수 있다.
+ */
+function menuShowPhoneLink() {
+  var props = PropertiesService.getScriptProperties();
+  var token = props.getProperty('DEPOSIT_TOKEN');
+  if (!token) {
+    if (!ask_('아이폰 연결용 비밀 토큰이 아직 없어요. 지금 새로 만들까요?')) return;
+    token = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+    props.setProperty('DEPOSIT_TOKEN', token);
+  }
+
+  var url = '';
+  try { url = ScriptApp.getService().getUrl() || ''; } catch (e) { url = ''; }
+  var urlOk = /\/exec$/.test(url);
+
+  var esc = function (s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+  var box = function (id, label, value) {
+    return '<p class="l">' + label + '</p>' +
+      '<textarea id="' + id + '" readonly rows="3">' + esc(value) + '</textarea>' +
+      '<button onclick="cp(\'' + id + '\', this)">복사</button>';
+  };
+  var html =
+    '<style>body{font-family:sans-serif;font-size:14px;line-height:1.5;margin:0 4px}' +
+    '.l{font-weight:bold;margin:14px 0 4px}textarea{width:100%;box-sizing:border-box;font-family:monospace;font-size:13px;word-break:break-all}' +
+    'button{margin-top:4px;padding:6px 16px;font-size:14px}.w{color:#b3261e}</style>' +
+    '<div>아이폰 단축어의 <b>"URL"</b> 칸과 <b>token</b> 칸에 아래 값을 그대로 붙여 넣으세요.</div>' +
+    (urlOk
+      ? box('u', '① 웹 앱 주소 (URL)', url)
+      : '<p class="l">① 웹 앱 주소 (URL)</p><div>여기서는 주소를 찾지 못했어요. Apps Script 편집기에서 <b>배포 → 배포 관리</b>를 열면 보이는 <b>웹 앱 URL</b>(끝이 /exec)을 쓰세요.</div>') +
+    box('t', '② 비밀 토큰 (token)', token) +
+    '<p class="w">토큰은 입금 확정 열쇠예요. 다른 사람에게 보내거나 시트에 적지 마세요.</p>' +
+    '<script>function cp(id,b){var t=document.getElementById(id);t.select();' +
+    'var ok=false;try{ok=document.execCommand("copy");}catch(e){}' +
+    'if(!ok&&navigator.clipboard){navigator.clipboard.writeText(t.value).then(function(){b.textContent="복사했어요";});return;}' +
+    'b.textContent=ok?"복사했어요":"글자를 길게 눌러 복사하세요";}</script>';
+
+  SpreadsheetApp.getUi().showModalDialog(
+    HtmlService.createHtmlOutput(html).setWidth(460).setHeight(urlOk ? 420 : 400),
+    '아이폰 연결 정보');
 }
 
 // ---------- 시트 정리 ----------
