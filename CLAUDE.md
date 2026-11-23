@@ -8,7 +8,7 @@
 
 | 세션 | 담당 (쓰기 가능) | 하는 일 |
 | --- | --- | --- |
-| 관리 | `SPEC.md`, `CLAUDE.md`, `docs/API.md`, `README.md`, `.gitignore` | 계약 정의, 결과 검토, 통합 테스트, git 커밋 |
+| 관리 | `SPEC.md`, `CLAUDE.md`, `docs/API.md`, `README.md`, `.gitignore`, `.github/` | 계약 정의, 결과 검토, 통합 테스트, git 커밋 |
 | 프론트 | `web/` 전체 | 정적 주문 페이지 |
 | 백엔드 | `apps-script/` (단, `Matching.js` 제외), `docs/SETUP.md` | Apps Script 웹 앱, 시트 구성, 트리거, 메일 |
 | 매칭 | `apps-script/Matching.js`, `tests/`, `samples/`, `docs/SHORTCUT.md` | 입금 알림 파서와 매칭 순수 함수, Node 단위 테스트, 단축어 설정 안내 |
