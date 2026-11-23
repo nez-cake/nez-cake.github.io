@@ -133,6 +133,7 @@
 }
 ```
 
+- 주문서 화면 구성(2026-11-23 사장님 요청): 손님에게 보이는 필수 항목은 픽업 날짜, 픽업 시간, 성함, 연락처, 케이크 개수 다섯 가지와 개인정보 동의뿐이다. 날짜와 시간은 달력·시간표 형태로 고른다. 케이크가 1종이면 케이크 선택 단계를 보여 주지 않고 `productId`를 자동으로 넣는다. `depositorName`은 성함과 같게 보내되 "입금자명이 다른가요?"를 펼치면 고칠 수 있게 한다. `email`, `memo`는 화면에서 빼고 빈 문자열로 보낸다. `lettering`은 `lettering.enabled`가 참일 때만 보인다. 요청 JSON의 모양은 그대로다.
 - `clientRequestId`: 프론트가 주문서를 열 때 한 번 만드는 무작위 문자열(`crypto.randomUUID()`, 없으면 대체 생성). 같은 값으로 두 번 들어오면 백엔드는 새 주문을 만들지 않고 처음 만든 주문을 그대로 돌려준다. 네트워크가 끊겨 재시도해도 주문이 둘이 되지 않게 하기 위해서다.
 - 금액은 보내지 않는다. 백엔드가 Products의 가격 × qty로 계산한다.
 
@@ -262,9 +263,9 @@ Config 탭 키 (백엔드가 시트 초기화 함수로 임시값을 채운다):
 
 | key | 임시값 | 설명 |
 | --- | --- | --- |
-| cafeName | 카페 이름 | |
+| cafeName | Nez | 네즈 (성산동·망원동) |
 | cafeTagline | 크리스마스 홀케이크 예약 | |
-| instagramUrl | (빈 값) | |
+| instagramUrl | https://www.instagram.com/nez.parfait/ | |
 | heroImageUrl | (빈 값) | |
 | bankName | 토스뱅크 | |
 | accountNumber | 0000-0000-0000 | |
@@ -273,12 +274,12 @@ Config 탭 키 (백엔드가 시트 초기화 함수로 임시값을 채운다):
 | orderCloseAt | 2026-12-21T23:59:00+09:00 | |
 | depositDeadlineHours | 24 | 수동 확정 기준의 넉넉한 값. 자동 확정 후 3으로 줄일 수 있음 |
 | pickupDates | 2026-12-23,2026-12-24,2026-12-25 | 쉼표 구분 |
-| pickupTimes | 12:00,13:00,14:00,15:00,16:00,17:00,18:00 | 쉼표 구분 |
+| pickupTimes | 12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00 | 쉼표 구분. 사장님 요청: 12:00~20:00, 30분 단위는 임시 |
 | capacityMode | total | `total`(날짜별 합계) 또는 `perProduct`(케이크별) |
 | capacity | {"2026-12-23":10,"2026-12-24":10,"2026-12-25":10} | perProduct면 {"2026-12-23":{"P1":5,"P2":5}} |
 | maxQtyPerOrder | 2 | |
 | maxPendingPerPhone | 3 | |
-| letteringEnabled | TRUE | |
+| letteringEnabled | FALSE | 사장님이 요청한 항목에 없어 기본은 끔 |
 | letteringMaxLength | 20 | |
 | bizName, bizOwner, bizRegNo, bizAddress, bizPhone | (빈 값) | 페이지 하단 |
 | refundPolicy | 픽업 3일 전까지 전액 환불, 이후 환불 불가 (임시) | |
