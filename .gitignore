@@ -1,0 +1,8 @@
+node_modules/
+.clasp.json
+.clasprc.json
+.env
+*.local.*
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
