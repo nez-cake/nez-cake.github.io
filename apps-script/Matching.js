@@ -20,10 +20,22 @@ var IGNORE_PATTERNS = [
   /님에게\s*[\d,]+\s*원을?\s*(보냈|송금)/ // 내가 보낸 돈
 ];
 
+// 맨 앞 toss-real-* 은 실제 원문 기반, 나머지 sample-* 은 가상(1원 테스트 후 정리).
 // 순서대로 시도하고 처음 맞는 것을 쓴다. 구체적인 형식을 앞에, 금액만 있는 것을 맨 뒤에 둔다.
 // name / amount는 캡처 그룹 번호이고, name이 null이면 이름 없이 금액만 뽑는 패턴이다.
 // 가상 샘플, 1원 테스트 후 교체.
 var NOTIFICATION_PATTERNS = [
+  {
+    // 실제 토스뱅크 알림 (1원 테스트로 확인). 두 줄:
+    //   "60,000원 입금"
+    //   "홍길동 -> 내 토스뱅크 통장"   (1원 입금은 이름이 "****"로 가려져 name: null)
+    // 화살표는 손으로 옮겨 적은 탓에 ->, →, =>, ➔ 등과 공백 유무를 모두 받는다.
+    // 화살표 뒤(통장 별명)는 무엇이든 허용한다.
+    id: 'toss-real-ipgeum-arrow',
+    regex: /([\d,]+)\s*원\s*입금\s*\n\s*([^\n]*?)\s*(?:->|-->|=>|→|⟶|➔|➜|➡|>)\s*\S/,
+    name: 2,
+    amount: 1
+  },
   {
     id: 'sample-nim-ipgeum', // 예: "홍길동님이 38,000원을 입금했어요" (가상)
     regex: /(\S+?)님(?:이|께서)\s*([\d,]+)\s*원을?\s*(?:입금|보냈)/,
@@ -88,6 +100,7 @@ function parseNotification(title, body) {
     var name = null;
     if (p.name !== null && m[p.name]) {
       name = String(m[p.name]).replace(/^[\s:：]+|[\s,.]+$/g, '') || null;
+      if (name && /^[*＊●•]+$/.test(name)) name = null; // 가려진 이름 "****"
     }
     return { kind: 'deposit', name: name, amount: amount, pattern: p.id };
   }

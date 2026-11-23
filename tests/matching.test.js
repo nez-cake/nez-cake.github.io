@@ -172,3 +172,53 @@ test('duplicate: 2분이 지났거나 내용이 다르면 중복 아님', () => 
   assert.equal(isDuplicateNotification({ ...base, receivedAtMs: 1005000 }, [base], 1000), false);
   assert.equal(isDuplicateNotification({ ...base, receivedAtMs: 1005000 }, [base], 10000), true);
 });
+
+// ---- 실제 토스뱅크 형식 (1원 테스트로 확인, 이름은 가짜) ----
+test('real: 제목/본문 분리, 화살표 ->', () => {
+  const r = parseNotification('60,000원 입금', '홍길동 -> 내 토스뱅크 통장');
+  assert.deepEqual([r.kind, r.name, r.amount, r.pattern], ['deposit', '홍길동', 60000, 'toss-real-ipgeum-arrow']);
+});
+
+test('real: 화살표 → 와 공백 없는 경우', () => {
+  for (const body of ['홍길동 → 내 토스뱅크 통장', '홍길동->내 토스뱅크 통장', '홍길동→내통장', '홍길동 - > 내 통장'.replace(' - > ', '=>')]) {
+    const r = parseNotification('2원 입금', body);
+    assert.deepEqual([r.kind, r.name, r.amount], ['deposit', '홍길동', 2], body);
+  }
+});
+
+test('real: 1원 입금은 이름이 가려져 name null', () => {
+  for (const arrow of ['->', '→', ' -> ']) {
+    const r = parseNotification('1원 입금', '****' + arrow + ' 내 토스뱅크 통장');
+    assert.deepEqual([r.kind, r.name, r.amount], ['deposit', null, 1]);
+  }
+});
+
+test('real: 두 줄이 한 덩어리 (title 비고 body에, 또는 반대)', () => {
+  const text = '60,000원 입금\n홍길동 -> 내 토스뱅크 통장';
+  for (const [t, b] of [['', text], [text, ''], [null, text], [text, undefined]]) {
+    const r = parseNotification(t, b);
+    assert.deepEqual([r.kind, r.name, r.amount], ['deposit', '홍길동', 60000]);
+  }
+});
+
+test('real: 통장 별명이 달라도, 이름에 공백이 있어도 읽는다', () => {
+  assert.equal(parseNotification('38,000원 입금', '홍길동 -> 가게 사업자 통장').name, '홍길동');
+  assert.equal(parseNotification('38,000원 입금', '홍 길동 -> 내 토스뱅크 통장').name, '홍 길동');
+  assert.equal(parseNotification('38,000원 입금', '홍길동(국민) -> 내 토스뱅크 통장').name, '홍길동(국민)');
+});
+
+test('real: 쉼표 금액과 매칭 연결', () => {
+  const parsed = parseNotification('1,238,000원 입금', '홍길동 -> 내 토스뱅크 통장');
+  assert.equal(parsed.amount, 1238000);
+  assert.equal(matchDeposit(parsed, [order('A', '입금대기', 1238000, '홍길동')]).result, 'matched');
+});
+
+test('real: 이름이 가려진 1원 입금은 자동 확정하지 않는다', () => {
+  const parsed = parseNotification('1원 입금', '**** -> 내 토스뱅크 통장');
+  const r = matchDeposit(parsed, [order('A', '입금대기', 1, '홍길동')]);
+  assert.equal(r.result, 'none');
+});
+
+test('real: 같은 형식의 출금·결제는 입금이 아니다', () => {
+  assert.equal(parseNotification('60,000원 출금', '내 토스뱅크 통장 -> 홍길동').kind, 'ignore');
+});
