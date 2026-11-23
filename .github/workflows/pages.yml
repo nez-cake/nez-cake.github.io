@@ -32,3 +32,4 @@ jobs:
           path: web
       - id: deployment
         uses: actions/deploy-pages@v4
+# 2026-11-24: 배포 다시 실행
