@@ -306,8 +306,9 @@ main:focus { outline: none; }
 .status-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--berry); }
 .status-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
-.order-id { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 14px; font-size: 14px; color: var(--ink-2); }
-.order-id code { font-family: var(--kr); font-weight: 700; font-size: 17px; letter-spacing: .05em; color: var(--ink); }
+/* 주문번호는 참고용: 작게 */
+.order-id { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; font-size: 13px; color: var(--ink-2); }
+.order-id code { font-family: var(--kr); font-size: 13px; letter-spacing: .04em; color: var(--ink-2); }
 
 .copy {
   flex: none; min-height: 44px; min-width: 64px; padding: 0 14px;
@@ -377,12 +378,19 @@ main:focus { outline: none; }
 /* ---------- 조회 ---------- */
 .lookup-wrap { max-width: 520px; margin: 0 auto; padding: 28px var(--gutter) 48px; }
 #lookupForm .btn { margin-top: 30px; }
-.recent { margin-top: 36px; }
-.recent p { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); }
-.recent a { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 52px; padding: 0 4px; border-bottom: 1px solid var(--line); text-decoration: none; }
-.recent p + a { border-top: 1px solid var(--line); }
-.recent code { font-family: var(--kr); font-weight: 700; letter-spacing: .05em; }
-.recent span { font-size: 14px; color: var(--ink-2); }
+/* 조회 결과 목록과 이 기기에서 넣은 주문 목록 */
+.order-list { margin-top: 32px; scroll-margin-top: 80px; }
+.order-list + .order-list { margin-top: 36px; }
+.ol-title { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); outline: none; }
+#lookupResults .ol-title { font-size: 16px; color: var(--ink); }
+.order-list a { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 64px; padding: 10px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.order-list .ol-title + a { border-top: 1px solid var(--line); }
+.order-list a:hover { background: var(--paper); }
+.ol-main { display: grid; gap: 2px; min-width: 0; }
+.ol-main b { font-size: 16px; }
+.ol-main small { font-size: 13px; color: var(--ink-2); }
+.ol-st { flex: none; padding: 4px 10px; border: 1px solid var(--line); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.ol-st.is-ok { border-color: var(--choco); color: var(--choco); }
 
 /* ---------- 불러오기 ---------- */
 .screen-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 60vh; padding: 60px var(--gutter); text-align: center; }

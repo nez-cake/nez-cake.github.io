@@ -667,7 +667,7 @@
     var saved = savedOrders()[orderId];
     if (!saved || !saved.phone4) {
       // 다른 기기에서 연 주소: 뒷 4자리를 다시 묻는다
-      openLookup(orderId, "이 기기에서 처음 여는 주문이에요. 연락처 뒷 4자리를 입력해 주세요.", true);
+      openLookup("이 기기에서 처음 여는 주문이에요. 주문하신 성함과 연락처를 입력해 주세요.", true, orderId);
       return;
     }
     showScreen("order");
@@ -713,7 +713,7 @@
       if (res.error && res.error.code === "NOT_FOUND") {
         stopPolling();
         var all = savedOrders(); delete all[id]; lsSet(KEY_ORDERS, all);
-        openLookup(id, res.error.message);
+        openLookup("주문을 다시 불러오지 못했어요. 주문하신 성함과 연락처로 찾아 주세요.", false, id);
         return;
       }
       if (live) live.textContent = "연결이 불안정해요. 자동으로 다시 확인하고 있어요.";
@@ -735,9 +735,10 @@
       "<div><dt>금액</dt><dd>" + won(d.amount) + "</dd></div>" +
       "</dl></section>";
   }
+  // 주문번호는 참고용으로 작게만 보여 준다. 손님은 성함 + 연락처로 다시 찾는다 (API.md 4-1장).
+  var RECHECK_TEXT = "주문하신 성함과 연락처로 언제든 다시 확인할 수 있어요.";
   function orderIdLine(id) {
-    return '<p class="order-id"><span>주문번호</span><code>' + esc(id) + "</code>" +
-      '<button type="button" class="copy copy-sm" data-copy="' + esc(id) + '" data-copy-label="주문번호" aria-label="주문번호 복사">복사</button></p>';
+    return '<p class="order-id"><span>주문번호</span><code>' + esc(id) + "</code></p>";
   }
   // 픽업 장소: business.address가 있을 때만. 지도는 네이버 지도 검색 링크.
   function placeHtml() {
@@ -843,8 +844,7 @@
         '</div><div class="order-side">' +
         summaryHtml(d) +
         '<div class="order-actions">' +
-        '<p class="tip">이 화면 주소에 주문번호가 들어 있어요. 저장해 두면 언제든 다시 볼 수 있어요.</p>' +
-        '<button type="button" class="btn btn-line btn-block" data-copy-url>이 화면 주소 복사</button>' +
+        '<p class="tip">' + RECHECK_TEXT + "</p>" +
         "</div></div></div>";
     } else if (d.status === "확정" || d.status === "픽업완료") {
       var done = d.status === "픽업완료";
@@ -852,13 +852,13 @@
         '<div class="narrow"><div class="confirmed-head">' +
         '<div class="stamp" aria-hidden="true"><span><b>' + (done ? "픽업 완료" : "예약 확정") + "</b><small>" + (done ? "고맙습니다" : "메리 크리스마스") + "</small></span></div>" +
         '<h1 class="h-lg">' + (done ? "맛있게 드세요" : "예약이 확정되었어요") + "</h1>" +
-        '<p class="muted">' + (done ? "올해도 함께해 주셔서 고마워요." : "입금이 확인되었어요. 픽업하실 때 주문번호를 알려 주세요.") + "</p>" +
+        '<p class="muted">' + (done ? "올해도 함께해 주셔서 고마워요." : "입금이 확인되었어요. 픽업하실 때 주문하신 성함과 연락처로 확인해 드려요.") + "</p>" +
         orderIdLine(d.orderId) +
         "</div>" +
         (done ? "" : '<div class="pickup-big"><p class="k">픽업 일시</p><p class="v">' + esc(fmtDate(d.pickupDate)) + " " + esc(d.pickupTime) + "</p></div>" + placeBox()) +
         (done ? "" : noticeBox()) +
         summaryHtml(d) +
-        '<div class="order-actions"><a class="btn btn-line btn-block" href="#">처음으로</a></div></div>';
+        '<div class="order-actions"><p class="tip">' + RECHECK_TEXT + '</p><a class="btn btn-line btn-block" href="#">처음으로</a></div></div>';
     } else {
       var expired = d.status === "만료";
       var phone = bizPhone();
@@ -884,66 +884,129 @@
   }
 
   // ---------------------------------------------------------------- 주문 조회
-  function openLookup(orderId, message, isInfo) {
-    showScreen("lookup");
-    var lf = $("#lookupForm"), idInput = $("#lookupOrderId"), p4 = $("#lookupPhone4"), err = $("#lookupError");
-    $all(".has-error", lf).forEach(function (b) { b.classList.remove("has-error"); });
-    $("#err-orderId").textContent = ""; $("#err-phone4").textContent = "";
-    if (orderId) idInput.value = orderId;
+  // 성함 + 연락처로 찾는다 (POST action=lookup, API.md 4-1장).
+  // 찾은 주문은 받은 orderId + 입력한 연락처 뒷 4자리로 이 기기에 저장해 두고,
+  // 입금 안내 화면은 지금처럼 status(주문번호 + 뒷 4자리)로 5초마다 자동 조회한다.
+  var lookupState = { hits: {}, phone4: "", wantId: null };
+  var STATUS_LABEL = { "입금대기": "입금 대기", "확정": "예약 확정", "픽업완료": "픽업 완료", "취소": "취소", "만료": "기한 지남" };
+
+  function orderItem(id, d, pick) {
+    d = d || {};
+    var when = d.pickupDate ? fmtDate(d.pickupDate) + (d.pickupTime ? " " + d.pickupTime : "") : "";
+    var st = d.status ? (STATUS_LABEL[d.status] || d.status) : "";
+    return '<a href="#order=' + encodeURIComponent(id) + '"' + (pick ? ' data-pick="' + esc(id) + '"' : "") + ">" +
+      '<span class="ol-main"><b>' + esc(when || "주문 보기") + "</b>" +
+      "<small>" + (d.qty ? esc(d.qty) + "개 · " : "") + "주문번호 " + esc(id) + "</small></span>" +
+      (st ? '<span class="ol-st' + (d.status === "확정" ? " is-ok" : "") + '">' + esc(st) + "</span>" : "") +
+      "</a>";
+  }
+
+  function lookupMark(name, msg) {
+    var input = name === "lkName" ? $("#lookupName") : $("#lookupPhone");
+    $('[data-field="' + name + '"]', $("#lookupForm")).classList.toggle("has-error", !!msg);
+    $("#err-" + name).textContent = msg || "";
+    if (msg) input.setAttribute("aria-invalid", "true"); else input.removeAttribute("aria-invalid");
+    return msg ? input : null;
+  }
+  function lookupMessage(msg, isInfo) {
+    var err = $("#lookupError");
     err.classList.toggle("is-info", !!isInfo);
     err.setAttribute("role", isInfo ? "status" : "alert");
-    if (message) { err.textContent = message; err.hidden = false; } else err.hidden = true;
-    p4.value = "";
+    if (msg) { err.textContent = msg; err.hidden = false; } else err.hidden = true;
+  }
+
+  function openLookup(message, isInfo, wantId) {
+    showScreen("lookup");
+    lookupMark("lkName", ""); lookupMark("lkPhone", "");
+    lookupMessage(message, isInfo);
+    lookupState.wantId = wantId || null;
+    $("#lookupResults").hidden = true;
 
     var all = savedOrders();
     var ids = Object.keys(all).filter(function (k) { return all[k].phone4; })
       .sort(function (a, b) { return (all[b].savedAt || 0) - (all[a].savedAt || 0); }).slice(0, 5);
     var list = $("#recentOrders");
     if (ids.length) {
-      list.innerHTML = "<p>이 기기에서 넣은 주문</p>" + ids.map(function (k) {
-        var l = all[k].last || {};
-        return '<a href="#order=' + encodeURIComponent(k) + '"><code>' + esc(k) + "</code>" +
-          "<span>" + esc(l.status || "") + (l.pickupDate ? " · " + esc(fmtDateShort(l.pickupDate)) : "") + "</span></a>";
-      }).join("");
+      list.innerHTML = '<p class="ol-title">이 기기에서 넣은 주문</p>' +
+        ids.map(function (k) { return orderItem(k, all[k].last); }).join("");
       list.hidden = false;
     } else list.hidden = true;
   }
 
+  // 찾은 주문을 이 기기에 저장 → 입금 안내 화면에서 status로 이어서 자동 조회
+  function keepFoundOrder(d, phone4) {
+    var prev = savedOrders()[d.orderId];
+    saveOrder(d.orderId, {
+      phone4: phone4,
+      depositorName: d.depositorName || (prev && prev.depositorName) || "",
+      last: mergeLast(prev, d)
+    });
+    state.poll.orderId = null; // 새로 그리기
+  }
+  function goOrder(id) {
+    var target = "#order=" + encodeURIComponent(id);
+    if (location.hash === target) route(); else location.hash = target;
+  }
+
+  function showLookupResults(orders) {
+    var box = $("#lookupResults");
+    lookupState.hits = {};
+    orders.forEach(function (o) { lookupState.hits[o.orderId] = o; });
+    box.innerHTML = '<p class="ol-title" tabindex="-1">주문이 ' + orders.length + "건 있어요. 확인할 주문을 골라 주세요.</p>" +
+      orders.map(function (o) { return orderItem(o.orderId, o, true); }).join("");
+    box.hidden = false;
+    var title = $(".ol-title", box);
+    title.focus({ preventScroll: true });
+    box.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function bindLookup() {
     var lf = $("#lookupForm");
-    var idInput = $("#lookupOrderId"), p4 = $("#lookupPhone4"), err = $("#lookupError"), btn = $("#lookupBtn");
-    p4.addEventListener("input", function () { p4.value = digits(p4.value).slice(0, 4); });
-    idInput.addEventListener("input", function () {
-      var v = idInput.value.toUpperCase().replace(/\s/g, "");
-      if (v !== idInput.value) idInput.value = v;
+    var nameInput = $("#lookupName"), phoneInput = $("#lookupPhone"), btn = $("#lookupBtn");
+    nameInput.addEventListener("input", function () { lookupMark("lkName", ""); });
+    phoneInput.addEventListener("input", function () {
+      var v = fmtPhone(phoneInput.value);
+      if (v !== phoneInput.value) phoneInput.value = v;
+      lookupMark("lkPhone", "");
     });
+    $("#lookupResults").addEventListener("click", function (e) {
+      var a = e.target.closest("[data-pick]");
+      if (!a) return;
+      var d = lookupState.hits[a.getAttribute("data-pick")];
+      if (d) keepFoundOrder(d, lookupState.phone4); // 저장한 뒤 링크(#order=)로 이동
+    });
+
     lf.addEventListener("submit", function (ev) {
       ev.preventDefault();
       if (btn.disabled) return;
-      var id = idInput.value.trim().toUpperCase(), ph = digits(p4.value);
-      var first = null;
-      function mark(name, input, msg) {
-        $('[data-field="' + name + '"]', lf).classList.toggle("has-error", !!msg);
-        $("#err-" + name).textContent = msg || "";
-        if (msg) { input.setAttribute("aria-invalid", "true"); if (!first) first = input; } else input.removeAttribute("aria-invalid");
-      }
-      mark("orderId", idInput, /^C-\d{4}-[0-9A-Z]{4}$/.test(id) ? "" : "주문번호를 확인해 주세요. 예: C-1224-A7K2");
-      mark("phone4", p4, /^\d{4}$/.test(ph) ? "" : "숫자 4자리를 입력해 주세요.");
-      err.hidden = true;
-      if (first) { first.focus(); return; }
+      var name = nameInput.value.trim(), ph = digits(phoneInput.value);
+      var nameLen = name.replace(/\s+/g, "").length;
+      var bad = [
+        lookupMark("lkName", nameLen >= 1 && nameLen <= 20 ? "" : "주문하실 때 적은 성함을 입력해 주세요."),
+        lookupMark("lkPhone", /^01[016789]\d{7,8}$/.test(ph) ? "" : "연락처를 확인해 주세요. 예: 010-1234-5678")
+      ].filter(Boolean);
+      lookupMessage("");
+      $("#lookupResults").hidden = true;
+      if (bad.length) { bad[0].focus(); return; }
 
       btn.disabled = true; btn.classList.add("is-loading");
-      apiGet({ action: "status", orderId: id, phone4: ph }).then(function (res) {
+      apiPost({ action: "lookup", customerName: name, phone: ph }).then(function (res) {
         btn.disabled = false; btn.classList.remove("is-loading");
-        if (!res.ok) {
-          err.classList.remove("is-info"); err.setAttribute("role", "alert");
-          err.textContent = res.error.message; err.hidden = false; return;
+        var orders = res.ok && res.data && Array.isArray(res.data.orders) ? res.data.orders : null;
+        if (!res.ok || !orders || !orders.length) {
+          var code = res.error && res.error.code;
+          if (res.ok || code === "NOT_FOUND") { lookupMessage("성함과 연락처를 다시 확인해 주세요."); return; }
+          if (code === "INVALID_INPUT" && res.error.field === "customerName") { lookupMark("lkName", "성함을 확인해 주세요.").focus(); return; }
+          if (code === "INVALID_INPUT" && res.error.field === "phone") { lookupMark("lkPhone", "연락처를 확인해 주세요.").focus(); return; }
+          lookupMessage(res.error && res.error.message ? res.error.message : "잠시 문제가 생겼어요. 다시 시도해 주세요.");
+          return;
         }
-        var prev = savedOrders()[id];
-        saveOrder(id, { phone4: ph, last: mergeLast(prev, res.data) });
-        var target = "#order=" + encodeURIComponent(id);
-        state.poll.orderId = null; // 새로 그리기
-        if (location.hash === target) route(); else location.hash = target;
+        lookupState.phone4 = ph.slice(-4);
+        // 다른 기기에서 연 주문 주소로 들어왔다면 그 주문을 바로 보여 준다
+        var want = lookupState.wantId && orders.filter(function (o) { return o.orderId === lookupState.wantId; })[0];
+        var pick = want || (orders.length === 1 ? orders[0] : null);
+        if (pick) { keepFoundOrder(pick, lookupState.phone4); goOrder(pick.orderId); return; }
+        showLookupResults(orders);
       });
     });
   }

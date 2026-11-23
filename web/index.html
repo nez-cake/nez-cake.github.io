@@ -17,7 +17,7 @@
     - 네 파일 모두 같은 값을 쓴다. 하나만 고쳐도 네 개를 함께 올린다(헷갈리지 않게).
     - index.html 자체에는 꼬리표를 붙일 수 없다. GitHub Pages는 파일을 10분쯤 캐시하므로, 배포 직후 10분 안에는 예전 화면이 보일 수 있다(그래도 짝이 맞는 파일끼리 열려 깨지지 않는다).
   -->
-  <link rel="stylesheet" href="styles.css?v=20261123b">
+  <link rel="stylesheet" href="styles.css?v=20261124a">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -197,22 +197,23 @@
       <div class="lookup-wrap">
         <p class="kicker">주문 확인</p>
         <h1 class="h-lg" id="lookupTitle">주문 조회</h1>
-        <p class="muted">주문번호와 주문할 때 적은 연락처 뒷 4자리를 입력해 주세요.</p>
+        <p class="muted">주문하실 때 적은 성함과 연락처를 입력해 주세요.</p>
         <form id="lookupForm" novalidate>
-          <div class="field" data-field="orderId">
-            <label for="lookupOrderId">주문번호</label>
-            <input class="input input-code" id="lookupOrderId" type="text" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="C-1224-A7K2" aria-describedby="err-orderId">
-            <p class="err" id="err-orderId"></p>
+          <div class="field" data-field="lkName">
+            <label for="lookupName">성함</label>
+            <input class="input" id="lookupName" type="text" autocomplete="name" maxlength="20" placeholder="김민지" aria-describedby="err-lkName">
+            <p class="err" id="err-lkName"></p>
           </div>
-          <div class="field" data-field="phone4">
-            <label for="lookupPhone4">연락처 뒷 4자리</label>
-            <input class="input input-code" id="lookupPhone4" type="tel" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000" aria-describedby="err-phone4">
-            <p class="err" id="err-phone4"></p>
+          <div class="field" data-field="lkPhone">
+            <label for="lookupPhone">연락처</label>
+            <input class="input" id="lookupPhone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="13" placeholder="010-0000-0000" aria-describedby="err-lkPhone">
+            <p class="err" id="err-lkPhone"></p>
           </div>
           <p class="form-error" id="lookupError" role="alert" hidden></p>
           <button type="submit" class="btn btn-solid btn-block" id="lookupBtn">조회하기</button>
         </form>
-        <div class="recent" id="recentOrders" hidden></div>
+        <div class="order-list" id="lookupResults" hidden></div>
+        <div class="order-list recent" id="recentOrders" hidden></div>
       </div>
     </section>
   </main>
@@ -240,8 +241,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js?v=20261123b"></script>
-  <script src="mock/mock-api.js?v=20261123b"></script>
-  <script src="app.js?v=20261123b"></script>
+  <script src="config.js?v=20261124a"></script>
+  <script src="mock/mock-api.js?v=20261124a"></script>
+  <script src="app.js?v=20261124a"></script>
 </body>
 </html>

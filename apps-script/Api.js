@@ -26,6 +26,8 @@ function doPost(e) {
         return createOrder_(body);
       case 'deposit':
         return receiveDeposit_(body);
+      case 'lookup':
+        return lookupOrders_(body);
       default:
         throw apiError_('INVALID_INPUT', '알 수 없는 요청이에요.');
     }

@@ -231,6 +231,58 @@ function getOrderStatus_(orderId, phone4) {
   return data;
 }
 
+// ---------- 성함 + 연락처로 찾기 (API.md 4-1장) ----------
+
+var LOOKUP_MAX_FAILS = 10;      // 같은 연락처로 1분에 틀릴 수 있는 횟수
+var LOOKUP_WINDOW_SEC = 60;
+
+function lookupOrders_(b) {
+  var name = String(b.customerName == null ? '' : b.customerName).replace(/[\s 　]+/g, '');
+  var phone = String(b.phone == null ? '' : b.phone).replace(/\D/g, '');
+  if (name.length < 1 || name.length > 20) {
+    throw apiError_('INVALID_INPUT', '성함을 1~20자로 적어 주세요.', 'customerName');
+  }
+  if (!PHONE_RE.test(phone)) throw apiError_('INVALID_INPUT', '휴대폰 번호를 정확히 적어 주세요.', 'phone');
+
+  var cache = CacheService.getScriptCache();
+  var key = 'lookupFail:' + phone;
+  var fails = Number(cache.get(key)) || 0;
+  if (fails >= LOOKUP_MAX_FAILS) {
+    throw apiError_('BUSY', '여러 번 맞지 않았어요. 1분 뒤에 다시 시도해 주세요.');
+  }
+
+  var cfg = null;
+  var found = readTable_(SHEET.ORDERS).rows.map(orderFromRow_).filter(function (o) {
+    return o.orderId && o.phone === phone && o.customerName.replace(/[\s 　]+/g, '') === name;
+  });
+  if (!found.length) {
+    cache.put(key, String(fails + 1), LOOKUP_WINDOW_SEC);
+    throw apiError_('NOT_FOUND', '성함과 연락처가 맞는 주문을 찾지 못했어요.');
+  }
+
+  found.sort(function (x, y) {
+    var a = parseDate_(x.createdAt), c = parseDate_(y.createdAt);
+    return (c ? c.getTime() : 0) - (a ? a.getTime() : 0) || y._row - x._row;
+  });
+  return {
+    orders: found.slice(0, 5).map(function (o) {
+      var d = {
+        orderId: o.orderId,
+        status: o.status,
+        productName: o.productName,
+        qty: o.qty,
+        amount: o.amount,
+        pickupDate: o.pickupDate,
+        pickupTime: o.pickupTime,
+        depositorName: o.depositorName,
+        depositDeadline: o.depositDeadline
+      };
+      if (o.status === ORDER_STATUS.PENDING) d.account = accountInfo_(cfg || (cfg = getConfig_()));
+      return d;
+    })
+  };
+}
+
 // ---------- 확정 ----------
 
 /**

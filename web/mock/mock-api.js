@@ -5,7 +5,9 @@
  * - catalog: catalog.json + 이 브라우저에서 넣은 가짜 주문 수량을 뺀 남은 수량
  * - order:   화면 왼쪽 아래 MOCK 패널에서 결과(성공, SOLD_OUT, INVALID_INPUT 등)를 고른다
  * - status:  N번 조회하면 "입금대기"에서 "확정"으로 바뀐다 (N은 패널에서 조정)
+ * - lookup:  성함 + 연락처로 찾기 (API.md 4-1장)
  * 데모 주문: C-1224-A7K2 / 전화 뒷 4자리 5678
+ * 조회 데모: 김민지 / 010-1234-5678 → 1건, 이준호 / 010-2222-3333 → 2건, 그 밖 → 없음
  *
  * 실제 API로 배포된 뒤에도 주소에 ?mock=1 을 붙이면 가짜 API로 볼 수 있다.
  * JSON을 fetch로 읽으므로 file://이 아니라 로컬 서버로 띄운다.
@@ -21,6 +23,14 @@
   var BASE = "mock/";
   var LS_KEY = "xmasCake.mock.v1";
   var DEMO = { orderId: "C-1224-A7K2", phone4: "5678" };
+  // 조회 데모 손님 (주문은 처음 조회할 때 가짜 저장소에 만든다)
+  var DEMO_PEOPLE = [
+    { name: "김민지", phone: "01012345678", orders: [{ id: "C-1224-A7K2" }] },
+    { name: "이준호", phone: "01022223333", orders: [
+      { id: "C-1223-B3QX", status: "입금대기", qty: 2, pickupDate: "2026-12-23", pickupTime: "13:30" },
+      { id: "C-1224-K5RT", status: "확정", qty: 1, pickupDate: "2026-12-24", pickupTime: "18:00" }
+    ] }
+  ];
   var ID_CHARS = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
   var cache = {};
 
@@ -103,21 +113,72 @@
     if (!o || o.phone4 !== p4) return getJSON("status-not-found");
 
     o.polls += 1;
-    var confirmed = o.data ? o.data.status === "확정" : false;
-    if (!confirmed && o.polls >= s.settings.confirmAfter) confirmed = true;
     save(s);
+    return snapshot(s, o).then(function (d) { delete d.depositorName; return { ok: true, data: d }; });
+  }
 
+  // 지금 상태의 주문 한 건 (status 응답 모양 + depositorName). 조회 횟수는 올리지 않는다.
+  function snapshot(s, o) {
+    var confirmed = (o.data && o.data.status === "확정") || o.polls >= s.settings.confirmAfter;
     return getJSON(confirmed ? "status-confirmed" : "status-pending").then(function (j) {
+      var d = j.data;
       if (o.data) {
         ["orderId", "productName", "qty", "amount", "pickupDate", "pickupTime", "depositDeadline"]
-          .forEach(function (k) { j.data[k] = o.data[k]; });
-        if (!confirmed) j.data.account = o.data.account;
+          .forEach(function (k) { d[k] = o.data[k]; });
+        if (!confirmed) d.account = o.data.account;
         if (confirmed && o.data.status !== "확정") {
           o.data.status = "확정";
           save(s);
         }
       }
-      return j;
+      d.depositorName = (o.data && o.data.depositorName) || o.name || "";
+      return d;
+    });
+  }
+
+  function nameKey(v) { return String(v || "").replace(/\s+/g, ""); }
+  function phoneKey(v) { return String(v || "").replace(/\D/g, ""); }
+
+  // 성함 + 연락처로 찾기 (API.md 4-1장): 최근 것부터 최대 5건
+  function lookup(body) {
+    var name = nameKey(body.customerName), phone = phoneKey(body.phone);
+    if (!name || name.length > 20) {
+      return Promise.resolve({ ok: false, error: { code: "INVALID_INPUT", field: "customerName", message: "성함을 확인해 주세요." } });
+    }
+    if (!/^01[016789]\d{7,8}$/.test(phone)) {
+      return Promise.resolve({ ok: false, error: { code: "INVALID_INPUT", field: "phone", message: "연락처를 확인해 주세요." } });
+    }
+    return catalog().then(function (cat) {
+      var s = load();
+      DEMO_PEOPLE.forEach(function (p) {
+        if (nameKey(p.name) !== name || p.phone !== phone) return;
+        p.orders.forEach(function (f, i) {
+          if (s.orders[f.id]) { s.orders[f.id].name = p.name; s.orders[f.id].phone = p.phone; return; }
+          var o = { data: null, phone4: p.phone.slice(-4), polls: 0, demo: true, name: p.name, phone: p.phone, createdAt: 1000 - i };
+          if (f.status) {
+            var product = cat.data.products[0];
+            o.data = {
+              orderId: f.id, status: f.status, productName: product.name, qty: f.qty,
+              amount: product.price * f.qty, pickupDate: f.pickupDate, pickupTime: f.pickupTime,
+              depositorName: p.name,
+              depositDeadline: toKstIso(Math.min(Date.now() + 24 * 3600 * 1000, Date.parse(f.pickupDate + "T23:59:00+09:00") - 24 * 3600 * 1000)),
+              account: clone(cat.data.account)
+            };
+            if (f.status === "확정") o.polls = 999;
+          }
+          s.orders[f.id] = o;
+        });
+      });
+      save(s);
+      var hits = Object.keys(s.orders).map(function (k) { return s.orders[k]; })
+        .filter(function (o) { return nameKey(o.name) === name && o.phone === phone; })
+        .sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); })
+        .slice(0, 5);
+      if (!hits.length) {
+        return { ok: false, error: { code: "NOT_FOUND", message: "성함과 연락처가 맞는 주문을 찾지 못했어요." } };
+      }
+      return Promise.all(hits.map(function (o) { return snapshot(s, o); }))
+        .then(function (orders) { return { ok: true, data: { orders: orders } }; });
     });
   }
 
@@ -159,7 +220,8 @@
       d.depositDeadline = toKstIso(deadline);
       d.account = clone(cat.account);
 
-      s.orders[d.orderId] = { data: clone(d), phone4: body.phone.slice(-4), polls: 0, productId: body.productId };
+      s.orders[d.orderId] = { data: clone(d), phone4: body.phone.slice(-4), polls: 0, productId: body.productId,
+        name: body.customerName, phone: phoneKey(body.phone), createdAt: now };
       if (body.clientRequestId) s.byRequest[body.clientRequestId] = d.orderId;
       save(s);
       return tpl;
@@ -191,6 +253,7 @@
     post: function (body) {
       return wait(900).then(function () {
         if (body.action === "order") return order(body);
+        if (body.action === "lookup") return lookup(body);
         return { ok: false, error: { code: "INTERNAL", message: "알 수 없는 요청이에요." } };
       });
     }
@@ -214,7 +277,7 @@
       '</select></label>' +
       '<label>확정까지 조회 횟수<input type="number" min="1" max="50" data-k="confirmAfter"></label>' +
       '<label class="mock-check"><input type="checkbox" data-k="closed"> 주문 접수 마감</label>' +
-      '<p class="mock-hint">데모 주문 C-1224-A7K2 / 5678</p>' +
+      '<p class="mock-hint">데모 주문 C-1224-A7K2 / 5678<br>조회 1건: 김민지 / 010-1234-5678<br>조회 2건: 이준호 / 010-2222-3333</p>' +
       '<button type="button" class="mock-reset">가짜 주문·저장값 초기화</button>' +
       '</div>';
     document.body.appendChild(wrap);
