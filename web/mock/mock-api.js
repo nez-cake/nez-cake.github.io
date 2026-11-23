@@ -7,12 +7,15 @@
  * - status:  N번 조회하면 "입금대기"에서 "확정"으로 바뀐다 (N은 패널에서 조정)
  * 데모 주문: C-1224-A7K2 / 전화 뒷 4자리 5678
  *
+ * 실제 API로 배포된 뒤에도 주소에 ?mock=1 을 붙이면 가짜 API로 볼 수 있다.
  * JSON을 fetch로 읽으므로 file://이 아니라 로컬 서버로 띄운다.
  *   예) web 폴더에서  python -m http.server 8000
  */
 (function () {
   "use strict";
   var cfg = window.APP_CONFIG || {};
+  // 확인용: 주소 끝에 ?mock=1 을 붙이면 config.js가 MOCK:false여도 이 브라우저 탭에서만 가짜 API를 쓴다
+  if (/[?&](mock=1|demo=)/.test(location.search)) cfg.MOCK = true;
   if (!cfg.MOCK) return;
 
   var BASE = "mock/";

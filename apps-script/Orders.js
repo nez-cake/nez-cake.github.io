@@ -79,10 +79,7 @@ function createOrder_(body) {
       clientRequestId: input.clientRequestId
     };
 
-    var row = toRowArray_(table.header, order).map(function (v) {
-      return typeof v === 'string' ? safeText_(v) : v;
-    });
-    table.sheet.appendRow(row);
+    table.sheet.appendRow(toRowArray_(table, order));
     return { created: true, order: order };
   });
 
@@ -185,7 +182,7 @@ function orderFromRow_(r) {
   return {
     _row: r._row,
     orderId: cellStr_(r.orderId),
-    createdAt: cellStr_(r.createdAt),
+    createdAt: cellIso_(r.createdAt),
     status: cellStr_(r.status),
     productId: cellStr_(r.productId),
     productName: cellStr_(r.productName),
@@ -199,8 +196,8 @@ function orderFromRow_(r) {
     depositorName: cellStr_(r.depositorName),
     lettering: cellStr_(r.lettering),
     memo: cellStr_(r.memo),
-    depositDeadline: cellStr_(r.depositDeadline),
-    confirmedAt: cellStr_(r.confirmedAt),
+    depositDeadline: cellIso_(r.depositDeadline),
+    confirmedAt: cellIso_(r.confirmedAt),
     confirmedBy: cellStr_(r.confirmedBy),
     depositId: cellStr_(r.depositId),
     clientRequestId: cellStr_(r.clientRequestId)
@@ -243,7 +240,7 @@ function getOrderStatus_(orderId, phone4) {
  */
 function markOrderConfirmed_(table, rowNum, confirmedBy, depositId, setStatus) {
   if (setStatus) setCell_(table, rowNum, 'status', ORDER_STATUS.CONFIRMED);
-  setCell_(table, rowNum, 'confirmedAt', toIso_(new Date()));
+  setCell_(table, rowNum, 'confirmedAt', new Date());
   setCell_(table, rowNum, 'confirmedBy', safeText_(confirmedBy));
   if (depositId) setCell_(table, rowNum, 'depositId', depositId);
 }

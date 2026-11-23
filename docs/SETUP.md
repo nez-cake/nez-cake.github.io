@@ -2,9 +2,24 @@
 
 이 순서대로 하면 구글 시트와 Apps Script 웹 앱이 준비된다. ✋ 표시는 브라우저에서 직접 해야 하는 단계다.
 
-준비물: 구글 계정, Node.js, 이 폴더.
+준비물: 구글 계정(카페용), Node.js, 이 폴더.
 
-> **어느 계정으로 하나.** 웹 앱은 "배포한 사람" 권한으로 돌고, 손님 메일도 그 계정에서 나간다. 개발과 테스트는 내 계정으로 하고, 운영 전에 사장님 계정으로 시트를 새로 만들어 같은 순서를 한 번 더 밟는 것을 권한다(12장).
+> **계정.** 웹 앱과 자동 작업(트리거)은 설치한 계정 권한으로 돌고, 손님 메일도 그 계정에서 나간다. 카페용 구글 계정으로 설치하고, 사장님 개인 계정은 시트에 **편집자로 공유**해 쓰게 한다(11장).
+
+## 시트 모양 (사장님이 보는 것)
+
+| 탭 | 내용 |
+| --- | --- |
+| 사용법 | 자주 하는 일 5가지(주문 확정, 취소, 가격·수량, 계좌, 접수 열고 닫기) |
+| 주문 | 주문 1건이 1줄. "상태" 칸은 드롭다운(입금대기·확정·만료·취소·픽업완료)과 색. 회색 칸은 자동으로 채워져 고치면 경고 |
+| 픽업 명단 | 보기용. B1에서 날짜를 고르면 그날 확정 주문이 시간순으로 |
+| 입금 | 아이폰이 보낸 입금 알림 1건이 1줄 |
+| 케이크 | 케이크 이름·가격·"판매 중" 체크박스 |
+| 설정 | "항목 · 값 · 설명" 세 열. 값 칸(노란색)만 고친다 |
+
+시트 위쪽 **예약 관리** 메뉴: 선택한 주문 확정하기 / 선택한 주문 취소하기 / 오늘 픽업 명단 보기 / 주문 받기 시작·중지 / 설정 점검 / 시트 모양 다시 정리하기.
+
+코드는 한글 머리글을 내부 키(orderId 등)로 바꿔 읽는다. 열 순서를 바꿔도 되지만 **머리글 글자는 바꾸면 안 된다**(보호 경고가 뜬다). 내부 키 목록은 `apps-script/Common.js`의 `COLUMNS`, 설정 항목은 `apps-script/Setup.js`의 `CONFIG_ITEMS`.
 
 ## 1. clasp 설치
 
@@ -12,176 +27,138 @@
 npm install -g @google/clasp
 ```
 
-```powershell
-clasp --version
-```
-
 ## 2. ✋ Apps Script API 켜기
 
-1. 브라우저에서 <https://script.google.com/home/usersettings> 를 연다.
-2. "Google Apps Script API"를 **사용**으로 바꾼다.
+<https://script.google.com/home/usersettings> 에서 "Google Apps Script API"를 **사용**으로.
 
-## 3. ✋ 구글 시트와 스크립트 프로젝트 만들기
+## 3. ✋ 로그인
 
-1. <https://sheets.new> 로 새 시트를 만들고 이름을 `크리스마스 케이크 예약`으로 바꾼다.
-2. 주소창의 `https://docs.google.com/spreadsheets/d/` **뒤부터 `/edit` 앞까지**가 시트 ID다. 메모장에 잠깐 복사해 둔다(어디에도 커밋하지 않는다).
-3. 시트 메뉴 **확장 프로그램 → Apps Script**를 누른다. 새 스크립트 편집기가 열린다.
-4. 편집기 왼쪽 톱니바퀴 **프로젝트 설정**에서 **스크립트 ID**를 복사한다.
+```powershell
+clasp login
+```
 
-## 4. 로컬 폴더와 연결
+브라우저가 열리면 카페용 구글 계정을 고르고 허용한다.
 
-1. `apps-script/.clasp.json.example`을 복사해 같은 폴더에 `.clasp.json`을 만들고 `scriptId`에 4번에서 복사한 스크립트 ID를 넣는다. (`.clasp.json`은 `.gitignore`에 들어 있다.)
+## 4. 시트와 스크립트 만들기, 코드 올리기
 
-   ```powershell
-   Copy-Item apps-script\.clasp.json.example apps-script\.clasp.json
-   ```
+`apps-script/` 폴더에서 새 시트와 거기 붙은 스크립트를 만든다. `.clasp.json`이 생긴다(`.gitignore`에 들어 있음).
 
-2. ✋ 로그인. 브라우저가 열리면 구글 계정을 고르고 허용한다.
+```powershell
+cd apps-script; clasp create-script --type sheets --title "Nez 크리스마스 케이크 예약" --rootDir .
+```
 
-   ```powershell
-   clasp login
-   ```
+이 명령은 `appsscript.json`을 기본값으로 덮어쓴다. **git에 있는 `appsscript.json`으로 되돌린 뒤** 올린다.
 
-3. 코드 올리기. 편집기에 있던 기본 `Code.gs`는 지워지고 이 폴더의 파일로 바뀐다. `-f`는 `appsscript.json` 덮어쓰기 확인을 건너뛴다.
+```powershell
+git checkout -- appsscript.json; clasp push -f
+```
 
-   ```powershell
-   cd apps-script; clasp push -f
-   ```
+이미 만든 시트에 연결할 때는 `.clasp.json.example`을 `.clasp.json`으로 복사하고 `scriptId`(편집기 **프로젝트 설정 → 스크립트 ID**)를 넣은 뒤 `clasp push -f`.
 
-4. 편집기를 새로고침해 `Api`, `Catalog`, `Common`, `Deposits`, `Matching`, `Notify`, `Orders`, `Setup`, `Triggers` 파일이 보이면 된다.
+## 5. ✋ 처음 설치 (한 번)
 
-## 5. ✋ Script Properties 설정
+1. 구글 드라이브에서 시트를 열고 **확장 프로그램 → Apps Script**.
+2. 왼쪽 `Setup.js` → 위쪽 함수 칸에서 `firstTimeSetup` → **▶ 실행**.
+3. 권한 창: **권한 검토 → 카페 계정 → 고급 → (프로젝트 이름)(으)로 이동(안전하지 않음) → 허용**. 내가 만든 스크립트라 뜨는 경고다.
+4. `firstTimeSetup`이 하는 일:
+   - 지금 시트의 ID를 Script Properties `SPREADSHEET_ID`에 저장(코드·문서에는 남지 않음)
+   - 탭·머리글·설정·사용법·픽업 명단 만들기(`setupSheets`)
+   - 입금 토큰 `DEPOSIT_TOKEN` 만들기(없을 때만, 로그에 한 번 보임. 단축어 설정 때 `rotateDepositToken`으로 새로 만들어도 된다)
+   - 트리거 설치(`installTriggers`)
+   - 점검 결과 로그(`checkSetup`)
 
-편집기 **프로젝트 설정 → 스크립트 속성 → 스크립트 속성 추가**:
+여러 번 실행해도 값은 그대로 둔다.
 
-| 속성 | 값 |
-| --- | --- |
-| `SPREADSHEET_ID` | 3장에서 복사한 시트 ID |
+### 예전(영어 탭) 시트를 새 모양으로 옮기기
 
-`DEPOSIT_TOKEN`은 직접 적지 않고 7장의 함수로 만든다.
+`Orders/Deposits/Products/Config` 탭으로 이미 만든 시트는 편집기에서 `migrateToKoreanSheets`를 실행하거나, 시트를 새로고침한 뒤 메뉴 **예약 관리 → 시트 모양 다시 정리하기**를 누른다. 탭 이름·머리글이 한글로 바뀌고, 설정 값(JSON 수량 → 날짜별 수량 줄, 픽업 시간 목록 → 시작·끝·간격, ISO 날짜 → 날짜 셀)은 그대로 옮겨진다. 주문·입금 기록은 지우지 않는다. 옮기기 전에도 웹 앱은 예전 탭 이름을 읽으므로 끊기지 않는다.
 
-## 6. ✋ 시트 초기화 (첫 실행 승인)
+## 6. 설정 바꾸기
 
-1. 편집기에서 `Setup.js`를 열고, 위쪽 함수 선택 칸에서 `setupSheets`를 골라 **실행**한다.
-2. 처음 실행하면 권한 요청이 뜬다. **권한 검토 → 계정 선택 → (Google에서 확인하지 않은 앱) 고급 → 프로젝트로 이동(안전하지 않음) → 허용**. 내가 만든 스크립트라 이 경고가 뜨는 것이 정상이다.
-3. 실행 로그에 `시트 준비 완료`가 나오면 시트로 가서 확인한다.
-   - 탭 `Orders`, `Deposits`, `Products`, `Config`, `픽업보기`가 생겼다.
-   - `Orders` 1행 맨 끝 열이 `clientRequestId`다.
-   - `Products`에 `P1`(크리스마스 딸기 초코 홀케이크, 가격 임시, 활성)과 `TEST100`(100원 테스트, 비활성)이 있다.
-   - `Config`에 키와 임시값이 채워져 있다.
+`설정` 탭 노란 "값" 칸만 고친다. 바로 반영된다(재배포 필요 없음).
 
-`setupSheets`는 여러 번 실행해도 이미 있는 값은 건드리지 않고 빠진 것만 채운다.
+- 날짜·시각: `2026-12-01 10:00`처럼 적는다(날짜 셀로 들어가도 된다).
+- 날짜별 수량: "12월 23일 수량" 같은 줄에 숫자. 0이면 그날 마감. "픽업 날짜"를 바꾸면 메뉴 **설정 점검**이 빠진 수량 줄을 만들어 준다.
+- 픽업 시간: "픽업 시작 시각", "픽업 끝 시각", "픽업 시간 간격(분)".
+- 켜고 끄기(체크박스): 주문 받기, 레터링 받기, 입금 자동 확정.
+- 안내 문구 1~4: 칸 하나가 catalog `notices`의 안내 1개다. 칸 안에서 줄을 바꿀 수 있고(Ctrl+Enter) 줄바꿈은 `\n`으로 그대로 나간다. 빈 칸은 건너뛴다. 확정 메일에도 들어간다.
+- 환불 규정: 주문 페이지와 손님 접수·확정 메일에 그대로 들어간다.
+- 시트 정리(`setupSheets`)는 빈 칸이나 예전 임시값이 그대로인 칸만 새 기본값(가게 정보, 소개·안내 문구, 환불 규정, 케이크 P1 이름·설명)으로 채운다. 사람이 고친 값은 덮어쓰지 않는다.
+- **입금 자동 확정**은 1원 테스트로 알림 해석이 확인되기 전까지 끈다. 꺼져 있으면 맞는 주문이 1건이어도 확정하지 않고, `입금` 탭 메모와 사장님 메일로 후보만 알려 준다.
 
-### Config에서 바꿀 값
+케이크는 `케이크` 탭에 줄을 추가한다. "케이크 코드"는 겹치지 않게(`P2` 등), "판매 중"을 체크.
 
-값은 `Config` 탭 B열을 고치면 바로 반영된다(재배포 필요 없음).
+## 7. 트리거 (자동 작업)
 
-- 카페 정보: `cafeName`, `cafeTagline`, `instagramUrl`, `heroImageUrl`
-- 계좌: `bankName`, `accountNumber`, `accountHolder` (페이지에 노출된다)
-- 접수 기간: `orderOpenAt`, `orderCloseAt` (`2026-12-01T10:00:00+09:00` 형식)
-- 수량 한도: `capacityMode`가 `total`이면 `capacity`는 `{"2026-12-23":10,...}`, `perProduct`면 `{"2026-12-23":{"P1":5,"P2":5},...}`
-- `ownerEmail`: 사장님 요약·미매칭 알림을 받을 주소. 비워 두면 스크립트 소유자에게 간다.
-- `autoConfirmEnabled`: 입금 알림으로 자동 확정할지. **1원 테스트로 파서를 확인하기 전까지 `FALSE`로 둔다.** `FALSE`면 매칭 후보가 1건이어도 확정하지 않고, Deposits note와 사장님 메일로 후보만 알려 준다.
-
-케이크는 `Products` 탭에서 행을 추가하고 `active` 체크박스를 켠다. `sortOrder` 순으로 보인다.
-
-## 7. 입금 토큰 만들기
-
-1. 편집기에서 `createDepositToken`을 실행한다.
-2. 실행 로그에 64자 토큰이 **한 번** 나온다. 아이폰 단축어의 `token` 값에 붙여 넣는다(`docs/SHORTCUT.md`). 메모장·메신저·문서 어디에도 저장하지 않는다.
-3. 잃어버렸거나 새어 나갔으면 `rotateDepositToken`으로 새로 만들고 단축어도 바꾼다.
-
-## 8. 트리거 설치
-
-편집기에서 `installTriggers`를 실행한다(추가 권한 요청이 뜨면 6장처럼 허용). 다음이 설치된다.
+`installTriggers`가 설치한다(`firstTimeSetup`에 포함). **카페 계정으로 한 번만** 실행한다. 다른 계정이 실행하면 그 계정 이름으로 한 벌 더 생겨 메일이 두 번 간다.
 
 | 함수 | 언제 | 하는 일 |
 | --- | --- | --- |
-| `runEvery10Minutes` | 10분마다 | 입금 마감 지난 주문 만료, 만료 30분 전 손님 안내 메일, 입금 알림이 하루 넘게 없으면 사장님 경고 |
-| `handleOrdersEdit` | 시트 편집 시 | `Orders` status를 "확정"으로 바꾸면 confirmedAt·confirmedBy를 채우고 손님에게 확정 메일 |
-| `sendDailySummary` | 매일 오전 9시 | 입금대기·미매칭·어제 만료 목록과 날짜별 확정 수량을 사장님에게 메일 |
+| `runEvery10Minutes` | 10분마다 | 입금 기한 지난 주문 만료, 기한 30분 전 손님 안내 메일, 입금 알림이 하루 넘게 없으면 사장님 경고 |
+| `handleOrdersEdit` | 시트를 고칠 때 | `주문` 탭 "상태"를 "확정"으로 바꾸면 확정 시각·확정한 사람을 채우고 손님에게 확정 메일 |
+| `sendDailySummary` | 매일 오전 9시 | 입금대기·확인할 입금·어제 만료 목록과 날짜별 확정 수량을 사장님에게 메일 |
 
-편집기 왼쪽 시계 아이콘(**트리거**)에서 세 개가 보이면 된다. 다시 실행해도 중복으로 쌓이지 않는다.
+## 8. ✋ 웹 앱 배포
 
-## 9. 설정 점검
-
-`checkSetup`을 실행하면 시트 ID·토큰·탭·트리거·매칭 모듈이 준비됐는지 로그에 나온다(값 자체는 보여 주지 않는다). `debugCatalog`는 catalog 응답을 로그로 보여 준다.
-
-## 10. ✋ 웹 앱 배포
+처음 한 번:
 
 1. 편집기 오른쪽 위 **배포 → 새 배포**.
-2. 톱니바퀴에서 유형 **웹 앱**.
-3. 설명: `v1`, 다음 사용자 인증 정보로 실행: **나**, 액세스 권한이 있는 사용자: **모든 사용자**.
-4. **배포**를 누르고 권한을 허용한다.
-5. 나오는 **웹 앱 URL**(`https://script.google.com/macros/s/.../exec`)을 복사해 관리 세션에 알려 준다. 프론트는 이 주소를 `web/config.js`에만 적는다.
+2. 톱니바퀴 → **웹 앱**. 실행: **나**, 액세스: **모든 사용자**.
+3. **배포** → 권한 허용 → **웹 앱 URL**(`.../exec`)을 프론트 `web/config.js`에 넣는다.
 
-### 코드를 고친 뒤 재배포
+### 코드를 고친 뒤 (주소 그대로 새 버전)
 
-`clasp push`만으로는 배포된 웹 앱이 바뀌지 않는다. 주소를 그대로 두고 새 버전으로 바꾸려면:
+`clasp push`만으로는 배포된 웹 앱이 바뀌지 않는다. **"새 배포"를 다시 누르면 주소가 바뀌니 누르지 않는다.**
 
 1. `cd apps-script; clasp push -f`
-2. 편집기 **배포 → 배포 관리 → (연필) 수정 → 버전: 새 버전 → 배포**.
+2. 편집기 **배포 → 배포 관리** → 기존 배포 선택 → 연필(수정) → 버전: **새 버전** → **배포**.
 
-"새 배포"를 다시 누르면 주소가 바뀌니 주의한다. Config·Products 값만 바꾼 경우는 재배포가 필요 없다.
+명령으로 할 때는 `clasp list-deployments`로 기존 배포 ID(`@1` 같은 버전이 붙은 줄)를 확인하고 `clasp update-deployment <배포 ID>`.
 
-## 11. 동작 확인
+설정·케이크 탭 값만 바꾼 경우는 재배포가 필요 없다.
 
-아래에서 `웹앱주소`는 10장의 `/exec` 주소다.
+## 9. 동작 확인
 
-### catalog (브라우저)
+`웹앱주소`는 8장의 `/exec` 주소.
 
-주소창에 `웹앱주소?action=catalog` 를 넣는다. `{"ok":true,"data":{"cafe":...,"products":[...],"availability":{...}}}` 가 보이면 된다. `ownerEmail`, 시트 링크, 토큰이 응답에 없는지도 확인한다.
+- **catalog**: 브라우저 주소창에 `웹앱주소?action=catalog`. `{"ok":true,...}`와 설정 탭의 카페 이름·픽업 시간·수량이 보이면 된다. 사장님 이메일·시트 링크·토큰은 없어야 한다.
+- **주문**: 주문 페이지에서 주문하거나 아래 PowerShell. "주문 받기 시작"이 미래면 `ORDER_CLOSED`가 나오니 테스트 때는 잠시 과거로 바꾼다.
 
-### 주문 넣기 (PowerShell)
+  ```powershell
+  $url = "웹앱주소"
+  $body = @{ action="order"; clientRequestId=[guid]::NewGuid().ToString(); productId="P1"; qty=1; pickupDate="2026-12-24"; pickupTime="14:00"; customerName="테스트"; phone="01012345678"; email=""; depositorName="테스트"; lettering=""; memo=""; agreePrivacy=$true } | ConvertTo-Json
+  Invoke-RestMethod -Uri $url -Method Post -ContentType "text/plain;charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($body)) | ConvertTo-Json -Depth 5
+  ```
 
-`orderOpenAt`이 미래면 `ORDER_CLOSED`가 나온다. 테스트할 때는 Config의 `orderOpenAt`을 과거로 잠시 바꾼다.
+  `주문` 탭에 노란 "입금대기" 줄이 생기고, catalog의 그 날짜 수량이 줄어든다. 같은 `$body`를 다시 보내면 같은 주문번호가 오고 줄이 늘지 않는다.
+- **조회**: `웹앱주소?action=status&orderId=C-1224-XXXX&phone4=5678`. 뒷 4자리가 틀리면 `NOT_FOUND`.
+- **수동 확정**: `주문` 탭 "상태"를 "확정"으로 → 몇 초 뒤 확정 시각·확정한 사람이 채워지고 줄이 초록색, 이메일이 있으면 확정 메일. 메뉴 **예약 관리 → 선택한 주문 확정하기**도 같다.
+- **입금 알림**:
 
-```powershell
-$url = "웹앱주소"
-$body = @{ action="order"; clientRequestId=[guid]::NewGuid().ToString(); productId="P1"; qty=1; pickupDate="2026-12-24"; pickupTime="14:00"; customerName="테스트"; phone="01012345678"; email=""; depositorName="테스트"; lettering=""; memo=""; agreePrivacy=$true } | ConvertTo-Json
-Invoke-RestMethod -Uri $url -Method Post -ContentType "text/plain;charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($body)) | ConvertTo-Json -Depth 5
-```
+  ```powershell
+  $token = Read-Host "DEPOSIT_TOKEN"
+  $body = @{ action="deposit"; token=$token; title="테스트 알림"; body="테스트님이 38,000원을 입금했어요"; receivedAt=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json
+  Invoke-RestMethod -Uri $url -Method Post -ContentType "application/json" -Body ([Text.Encoding]::UTF8.GetBytes($body)) | ConvertTo-Json
+  ```
 
-- 응답에 `orderId`(예: `C-1224-A7K2`)와 `depositDeadline`이 온다.
-- `Orders` 탭에 `입금대기` 행이 생긴다. 같은 `$body`로 한 번 더 보내면 같은 주문번호가 오고 행이 늘지 않는다.
-- 브라우저로 `웹앱주소?action=catalog` 를 다시 열면 그 날짜 `availability`가 줄어 있다.
+  `입금` 탭에 줄이 생긴다. 2분 안에 같은 요청은 `duplicate: true`. 토큰이 틀리면 `UNAUTHORIZED`이고 아무것도 안 생긴다.
+- **만료**: 테스트 주문의 "입금 기한"을 과거로 고치고 편집기에서 `runEvery10Minutes` 실행 → "만료"(회색).
+- 끝나면 테스트 줄을 지우고 설정을 되돌린다.
 
-### 주문 조회 (브라우저)
+## 10. 사장님 계정으로 편집할 때
 
-`웹앱주소?action=status&orderId=C-1224-A7K2&phone4=5678` → 상태가 온다. 뒷 4자리를 틀리면 `NOT_FOUND`.
+시트를 사장님 개인 계정에 **편집자**로 공유하면:
 
-### 수동 확정
+- "상태"를 "확정"으로 바꾸는 것: 카페 계정이 설치한 시트 편집 트리거가 **다른 편집자의 수정에도 실행**되므로 확정 처리와 손님 메일이 된다. 메일은 카페 계정에서 나간다. 다만 개인 gmail 계정끼리는 구글이 편집한 사람의 이메일을 알려 주지 않아 "확정한 사람"은 `사장님(수동)`으로 적힌다.
+- **예약 관리** 메뉴: 사장님 계정으로 처음 누를 때 권한 허용 창이 한 번 뜬다(5장 3번과 같은 순서). 메뉴로 확정하면 손님 메일이 **사장님 계정에서** 나간다.
+- 사장님 계정으로는 `installTriggers`나 `firstTimeSetup`을 실행하지 않는다(7장).
 
-`Orders` 탭에서 그 주문의 status를 드롭다운으로 `확정`으로 바꾼다. 몇 초 뒤 `confirmedAt`, `confirmedBy`가 채워지고, 주문에 이메일이 있으면 확정 메일이 간다. 조회 응답 status도 `확정`이 된다.
+## 11. 운영 전
 
-### 입금 알림 (PowerShell)
+1. 설정 탭에 실제 계좌·예금주·사장님 이메일·수량·가게 정보를 넣고 메뉴 **설정 점검**으로 확인.
+2. 1원 테스트로 알림 해석이 확인되면 "입금 자동 확정"을 켜고, 원하면 "입금 기한(시간)"을 줄인다.
+3. `TEST100`(100원 테스트 상품)은 끝에서 끝까지 테스트 후 "판매 중" 체크를 끈다.
 
-```powershell
-$token = Read-Host "DEPOSIT_TOKEN"
-$body = @{ action="deposit"; token=$token; title="테스트 알림"; body="테스트님이 38,000원을 입금했어요"; receivedAt=(Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz") } | ConvertTo-Json
-Invoke-RestMethod -Uri $url -Method Post -ContentType "application/json" -Body ([Text.Encoding]::UTF8.GetBytes($body)) | ConvertTo-Json
-```
+## 12. 픽업 이후 개인정보 삭제
 
-- `Deposits` 탭에 원문 행이 생긴다. 파서가 형식을 모르면 `미매칭` + note "알림 해석 실패"로 남고 사장님 메일이 간다.
-- 같은 요청을 2분 안에 다시 보내면 `duplicate: true`, status `무시`.
-- 토큰을 틀리게 보내면 `UNAUTHORIZED`이고 시트에 아무것도 생기지 않는다.
-
-### 만료
-
-테스트 주문의 `depositDeadline`을 과거 시각(`2026-11-01T00:00:00+09:00`)으로 고치고 10분 안에 status가 `만료`로 바뀌는지 본다. 기다리기 싫으면 편집기에서 `runEvery10Minutes`를 직접 실행한다.
-
-### 테스트 데이터 정리
-
-확인이 끝나면 `Orders`, `Deposits`의 테스트 행을 지우고 Config `orderOpenAt`을 원래 값으로 되돌린다.
-
-## 12. 운영 전 (사장님 계정으로 옮기기)
-
-1. 사장님 구글 계정으로 3~10장을 다시 한다(새 시트, 새 스크립트, 새 토큰, 새 웹 앱 주소). `.clasp.json`의 `scriptId`도 새 것으로 바꾸고 `clasp login`도 사장님 계정으로 한다.
-2. Config에 실제 값(계좌, 카페 정보, `ownerEmail`, 수량 한도)을 넣는다.
-3. 프론트 `web/config.js`의 주소를 새 웹 앱 주소로 바꾼다.
-4. 1원 테스트로 파서가 확인되면 `autoConfirmEnabled`를 `TRUE`로 바꾸고, 원하면 `depositDeadlineHours`를 줄인다.
-5. `TEST100` 상품은 끝에서 끝까지 테스트 후 다시 비활성으로 둔다.
-
-## 13. 픽업 이후 개인정보 삭제
-
-환불 문의 기간이 끝나면 편집기에서 `purgePersonalData`를 실행한다. 픽업일이 지난 주문의 이름·전화번호·이메일·입금자명·레터링·요청사항과 Deposits의 알림 원문·입금자명을 지운다. 주문번호·상품·금액·상태는 매출 기록으로 남는다. 되돌릴 수 없으니 필요하면 먼저 시트 사본을 만든다(**파일 → 사본 만들기**).
+환불 문의 기간이 끝나면 편집기에서 `purgePersonalData`를 실행한다. 픽업일이 지난 주문의 성함·연락처·이메일·입금자명·레터링·요청사항과 입금 탭의 알림 내용·입금자명을 지운다. 주문번호·케이크·금액·상태는 남는다. 되돌릴 수 없으니 먼저 **파일 → 사본 만들기**.

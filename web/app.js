@@ -128,22 +128,21 @@
   function parseHash() {
     var h = decodeURIComponent((location.hash || "").replace(/^#/, ""));
     if (h.indexOf("order=") === 0) return { name: "order", orderId: h.slice(6).trim().toUpperCase() };
-    if (h === "form") return { name: "form" };
     if (h === "lookup") return { name: "lookup" };
-    return { name: "intro" };
+    return { name: "home", toForm: h === "form" }; // 소개와 주문서는 한 화면. #form이면 주문서 자리로 내려 준다
   }
 
-  var TITLES = { intro: "", form: "예약하기", order: "입금 안내", lookup: "주문 조회", loading: "", error: "" };
+  var TITLES = { home: "", order: "입금 안내", lookup: "주문 조회", loading: "", error: "" };
 
   function showScreen(name) {
     var changed = state.screen !== name;
     $all("[data-screen]").forEach(function (s) { s.hidden = s.getAttribute("data-screen") !== name; });
-    $("#backBtn").hidden = name === "intro" || name === "loading" || name === "error";
-    document.body.classList.toggle("has-bar", name === "form");
+    $("#backBtn").hidden = name === "home" || name === "loading" || name === "error";
+    document.body.classList.toggle("has-bar", name === "home" && !$("#orderForm").hidden);
     $("#footer").hidden = !state.catalog || name === "loading";
     state.screen = name;
     var cafe = state.catalog && state.catalog.cafe ? state.catalog.cafe : {};
-    var base = (cafe.name ? cafe.name + " · " : "") + (cafe.tagline || "크리스마스 홀케이크 예약");
+    var base = (cafe.name ? cafe.name + " · " : "") + "크리스마스 홀케이크 예약"; // tagline은 소개 문단이라 제목에 쓰지 않는다
     document.title = TITLES[name] ? TITLES[name] + " · " + base : base;
     if (changed) {
       window.scrollTo(0, 0);
@@ -158,9 +157,10 @@
 
     if (r.name === "lookup") { openLookup(); return; }
     if (r.name === "order") { openOrder(r.orderId); return; }
-    if (!state.catalog) { ensureCatalog(); return; } // 카탈로그를 받은 뒤 다시 route()
-    if (r.name === "form") { openForm(); return; }
-    showScreen("intro");
+    // 소개+주문서: API를 기다리지 않고 바로 보여 준다. 가격·날짜 자리는 뼈대로 있다가 채워진다.
+    showScreen("home");
+    if (!state.catalog) loadIntroData(r.toForm);
+    else { openForm(); if (r.toForm) scrollToForm(); }
   }
 
   // ---------------------------------------------------------------- 카탈로그
@@ -175,6 +175,29 @@
       catalogPromise = null;
       $("#loadErrorMsg").textContent = (res && res.error && res.error.message) || "인터넷 연결을 확인하고 다시 시도해 주세요.";
       showScreen("error");
+    });
+  }
+
+  function scrollToForm() {
+    var f0 = $("#orderForm");
+    var target = f0.hidden ? $("#closedNotice") : f0;
+    if (target && !target.hidden) setTimeout(function () { target.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+  }
+
+  function loadIntroData(toForm) {
+    var msg = $("#introLoadMsg");
+    msg.textContent = "예약 현황을 불러오고 있어요…";
+    msg.hidden = false;
+    if (catalogPromise) return;
+    catalogPromise = loadCatalog().then(function () {
+      catalogPromise = null;
+      if (state.screen === "home") { openForm(); if (toForm) scrollToForm(); }
+    }, function (res) {
+      catalogPromise = null;
+      // 실패해도 사진·제목·설명은 그대로 보이고, 이 자리에만 안내와 다시 시도 버튼을 둔다
+      msg.innerHTML = esc((res && res.error && res.error.message) || "예약 현황을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.") +
+        '<br><button type="button" class="btn btn-line" id="introRetry">다시 불러오기</button>';
+      $("#introRetry").addEventListener("click", function () { loadIntroData(toForm); });
     });
   }
 
@@ -213,31 +236,31 @@
     var dates = c.pickupDates || [];
     var times = c.pickupTimes || [];
 
-    $("#logoName").textContent = cafe.name || "";
-    $("#logoSub").textContent = BRAND.logoSub || "";
-    $("#logoSub").hidden = !BRAND.logoSub;
-
-    // 소개
+    // 로고·제목·사진은 HTML에 이미 있다. 시트 값이 다를 때만 바꾼다.
+    if (cafe.name) { $("#logoName").textContent = cafe.name; $("#introCafe").textContent = cafe.name; }
+    if (BRAND.logoSub) $("#logoSub").textContent = BRAND.logoSub;
+    if (BRAND.motto) $("#introKicker").textContent = BRAND.motto;
+    if (String(cafe.tagline || "").trim()) $("#introLead").textContent = String(cafe.tagline).trim(); // 소개 문단
     var hero = $("#heroPhoto");
-    bgImage(hero, cafe.heroImageUrl || IMAGES.hero || "");
-    hero.setAttribute("role", "img");
+    var heroUrl = cafe.heroImageUrl || IMAGES.hero || "";
+    if (heroUrl && heroUrl !== IMAGES.hero) bgImage(hero, heroUrl);
     hero.setAttribute("aria-label", (c.products[0] && c.products[0].name ? c.products[0].name : "케이크") + " 사진");
-    var year = dates.length ? dates[0].slice(0, 4) : "";
-    $("#introKicker").textContent = [BRAND.motto, year ? "Christmas " + year : ""].filter(Boolean).join(" — ");
-    $("#introTitle").innerHTML = esc(cafe.name || "") + "의 크리스마스<br>홀케이크를 예약받아요";
-    $("#introLead").textContent = dates.length
-      ? fmtDate(dates[0]).replace(/ \(.\)/, "") + "부터 " + fmtDate(dates[dates.length - 1]).replace(/ \(.\)/, "").replace(/^\d+월 /, "") +
-        "까지 매장에서 찾아가실 수 있어요. 날짜별로 만들 수 있는 만큼만 예약을 받아요."
-      : "";
+    var open = isOpen();
+    var before = !open && c.order && c.order.openAt && Date.now() < Date.parse(c.order.openAt);
+    var openLabel = before ? fmtMonthDay(c.order.openAt) + " 오픈" : "접수 마감";
 
+    $("#introLoadMsg").hidden = true;
+    $("#introData").removeAttribute("aria-busy");
+    $("#introData").classList.add("fill-in");
     $("#cakeList").innerHTML = c.products.map(function (p) {
-      return "<li><div><b>" + esc(p.name) + "</b>" + (p.description ? "<span>" + esc(p.description) + "</span>" : "") +
+      return "<li><div><b>" + esc(p.name) + "</b>" + (p.description ? '<span class="desc">' + esc(p.description) + "</span>" : "") +
         '</div><span class="price">' + won(p.price) + "</span></li>";
     }).join("");
 
     $("#introDates").innerHTML = dates.map(function (d) {
       var pp = ymdParts(d), out = dateAllOut(d), n = dateTotal(d), cls = "", s = "예약 가능";
       if (out) { cls = "is-out"; s = "마감"; }
+      else if (!open) { cls = "is-closed"; s = openLabel; } // 접수 전·마감 후에는 버튼과 같은 말로
       else if (n <= 3) { cls = "is-low"; s = n + "개 남음"; }
       return '<div role="listitem" class="' + cls + '" aria-label="' + esc(fmtDate(d) + " " + s) + '">' +
         '<div class="n" aria-hidden="true">' + pp.d + '</div><div class="w" aria-hidden="true">' + pp.w + '요일</div>' +
@@ -249,32 +272,43 @@
     if (c.order && c.order.depositDeadlineHours) note.push("주문 후 " + c.order.depositDeadlineHours + "시간 안에 계좌이체");
     if (c.order && c.order.closeAt) note.push("주문 마감 " + fmtDateTime(c.order.closeAt));
     $("#introNote").innerHTML = note.map(function (n) { return "<span>" + esc(n) + "</span>"; }).join('<span aria-hidden="true"> · </span>');
+    renderPlace($("#introPlace"));
 
-    var notice = $("#closedNotice"), start = $("#startOrder");
-    if (!isOpen()) {
-      var before = c.order.openAt && Date.now() < Date.parse(c.order.openAt);
+    // 접수 전·마감 후: 주문서와 하단 바를 숨기고 안내만 보인다
+    var notice = $("#closedNotice");
+    if (!open) {
       notice.textContent = before
-        ? fmtDateTime(c.order.openAt) + "부터 주문을 받아요."
+        ? fmtOpenAt(c.order.openAt) + "부터 주문을 받아요."
         : "올해 크리스마스 케이크 주문 접수가 마감되었어요. 감사합니다.";
       notice.hidden = false;
-      start.textContent = before ? "주문 접수 전이에요" : "주문 접수 마감";
-      start.setAttribute("aria-disabled", "true");
+      $("#orderForm").hidden = true;
+      $("#orderBar").hidden = true;
     } else {
       notice.hidden = true;
-      start.textContent = "예약하기";
-      start.removeAttribute("aria-disabled");
+      $("#orderForm").hidden = false;
+      $("#orderBar").hidden = false;
     }
+    document.body.classList.toggle("has-bar", state.screen === "home" && open);
 
+    // 픽업 안내(notices): 비어 있으면 구역 전체를 숨긴다
+    var notices = noticeList();
     var story = $("#story");
-    if (IMAGES.story) {
-      bgImage($("#storyPhoto"), IMAGES.story);
-      $("#storyPhoto").setAttribute("role", "img");
-      $("#storyPhoto").setAttribute("aria-label", "작업대에 줄지어 놓인 홀케이크들");
-      story.hidden = false;
-    } else story.hidden = true;
+    $("#introNotices").innerHTML = notices.map(noticeItem).join("");
+    story.hidden = !notices.length;
+
 
     renderFooter();
+    $("#footer").hidden = state.screen === "loading" || state.screen === "error";
     buildForm();
+    // 주문 화면이 카탈로그보다 먼저 그려졌으면 픽업 장소·연락처를 넣어 다시 그린다
+    if (state.screen === "order") {
+      var r = parseHash(), saved = r.orderId ? savedOrders()[r.orderId] : null;
+      if (saved && saved.last) {
+        state.poll.lastStatus = null;
+        $("#orderView").removeAttribute("data-order");
+        renderOrder(saved.last, saved);
+      }
+    }
   }
 
   function renderFooter() {
@@ -282,12 +316,16 @@
     $("#footName").textContent = cafe.name || b.name || "";
     var rows = [
       ["상호", b.name], ["대표자", b.owner], ["사업자등록번호", b.regNo], ["주소", b.address], ["연락처", b.phone]
-    ].filter(function (r) { return r[1]; });
+    ].map(function (r) { return [r[0], String(r[1] == null ? "" : r[1]).trim()]; })
+      .filter(function (r) { return r[1]; });
+    $("#footBiz").hidden = !rows.length; // 값이 하나도 없으면 빈 줄을 남기지 않는다
     $("#footBiz").innerHTML = rows.map(function (r) {
       var v = r[0] === "연락처" ? '<a href="tel:' + esc(digits(r[1])) + '">' + esc(r[1]) + "</a>" : esc(r[1]);
       return "<div><dt>" + esc(r[0]) + "</dt><dd>" + v + "</dd></div>";
     }).join("");
-    var refund = (c.policies || {}).refund;
+    var refund = String((c.policies || {}).refund || "").trim();
+    $("#formRefundText").textContent = refund;
+    $("#formRefund").hidden = !refund;
     $("#footRefund").textContent = refund || "";
     $("#footPolicy").hidden = !refund;
     var insta = $("#footInsta");
@@ -433,13 +471,7 @@
       : "한 번에 " + cap + "개까지 주문할 수 있어요.";
 
     var p = s.productId ? productById(s.productId) : null;
-    $("#formSub").textContent = singleProduct() && p ? p.name + " · " + won(p.price) : "";
     $("#totalAmount").textContent = won(p ? p.price * s.qty : 0);
-    $("#sumCake").textContent = p ? p.name + " × " + s.qty : "-";
-    $("#sumPickup").textContent = s.pickupDate
-      ? fmtDate(s.pickupDate) + (s.pickupTime ? " " + s.pickupTime : " · 시간 선택 전")
-      : "날짜와 시간을 골라 주세요";
-    syncDepositorSummary();
     // 모바일 하단 바: 고른 날짜·시간·개수를 금액 위에 보여 준다
     $("#barMeta").textContent = s.pickupDate
       ? fmtDateShort(s.pickupDate) + (s.pickupTime ? " " + s.pickupTime : "") + " · " + s.qty + "개"
@@ -453,13 +485,12 @@
   function depositorValue() {
     return (f.depositorName.value.trim() || f.customerName.value.trim());
   }
-  function syncDepositorSummary() { $("#sumDepositor").textContent = depositorValue() || "-"; }
+  function syncDepositorSummary() { /* 한 화면형: 별도 요약 칸 없음 */ }
 
   function openForm() {
-    if (!isOpen()) { location.replace("#"); return; }
-    // 주문서를 열 때 clientRequestId를 한 번 만든다. 재시도해도 같은 값을 보낸다.
+    if (!state.catalog || !isOpen()) return;
+    // 주문서를 처음 보여 줄 때 clientRequestId를 한 번 만든다. 재시도해도 같은 값을 보낸다.
     if (!ssGet(KEY_REQ)) ssSet(KEY_REQ, uuid());
-    showScreen("form");
     syncChoices();
   }
 
@@ -539,6 +570,10 @@
     var errs = validate(o);
     if (errs.length) {
       errs.forEach(function (e) { setFieldError(e[0], e[1]); });
+      // 긴 한 화면이라, 빠진 항목을 알려 주고 첫 항목 자리로 부드럽게 올려 준다
+      var NAMES = { productId: "케이크", pickupDate: "픽업 날짜", pickupTime: "픽업 시간", customerName: "성함",
+        depositorName: "입금자명", phone: "연락처", qty: "개수", lettering: "레터링", agreePrivacy: "개인정보 동의" };
+      toast("확인해 주세요: " + errs.map(function (e) { return NAMES[e[0]] || e[0]; }).join(", "));
       focusField(errs[0][0]);
       return;
     }
@@ -704,6 +739,57 @@
     return '<p class="order-id"><span>주문번호</span><code>' + esc(id) + "</code>" +
       '<button type="button" class="copy copy-sm" data-copy="' + esc(id) + '" data-copy-label="주문번호" aria-label="주문번호 복사">복사</button></p>';
   }
+  // 픽업 장소: business.address가 있을 때만. 지도는 네이버 지도 검색 링크.
+  function placeHtml() {
+    var a = state.catalog && state.catalog.business ? String(state.catalog.business.address || "").trim() : "";
+    if (!a) return "";
+    return '<span>픽업 장소 <b>' + esc(a) + "</b></span>" +
+      '<a href="https://map.naver.com/p/search/' + encodeURIComponent(mapQuery(a)) + '" target="_blank" rel="noopener">지도 보기<span class="sr-only"> (새 창)</span></a>';
+  }
+  function noticeList() {
+    var n = state.catalog && state.catalog.notices;
+    return Array.isArray(n) ? n.map(function (s) { return String(s == null ? "" : s).trim(); }).filter(Boolean) : [];
+  }
+  // 사장님 문구는 글자 그대로 보여 준다(줄바꿈은 CSS pre-line).
+  // 이모지(📍 등)로 시작하는 줄에는 목록 점을 붙이지 않아 겹치지 않게 한다.
+  var EMOJI_START;
+  try { EMOJI_START = new RegExp("^\\p{Extended_Pictographic}", "u"); }
+  catch (e) { EMOJI_START = /^(?:[\uD83C-\uD83E][\uDC00-\uDFFF]|[☀-➿])/; }
+  function noticeItem(s) {
+    return "<li" + (EMOJI_START.test(s) ? ' class="no-dot"' : "") + ">" + esc(s) + "</li>";
+  }
+  function noticeBox() {
+    var n = noticeList();
+    if (!n.length) return "";
+    return '<section class="osum notice-sum" aria-label="픽업 안내"><h2>픽업 안내</h2><ul class="notices">' +
+      n.map(noticeItem).join("") + "</ul></section>";
+  }
+  function placeBox() {
+    var h = placeHtml();
+    return h ? '<div class="place-box"><p class="place">' + h + "</p></div>" : "";
+  }
+  // "마포구 성미산로 29-1 1층 카페 네즈" → "마포구 성미산로 29-1" (층·상호를 빼야 지도 검색이 정확하다)
+  function mapQuery(a) {
+    var m = /^(.*?(?:로|길|동)\s*\d+(?:-\d+)?)(?:\s|,|$)/.exec(a);
+    return m ? m[1] : a;
+  }
+  function renderPlace(el) {
+    var h = placeHtml();
+    el.innerHTML = h;
+    el.hidden = !h;
+  }
+  // "2026-12-01T10:00:00+09:00" → "12월 1일 오전 10시" (분이 있으면 10시 30분)
+  function fmtOpenAt(iso) {
+    var k = new Date(Date.parse(iso) + 9 * 3600 * 1000);
+    var h = k.getUTCHours(), mi = k.getUTCMinutes();
+    return (k.getUTCMonth() + 1) + "월 " + k.getUTCDate() + "일 " + (h < 12 ? "오전 " : "오후 ") +
+      (h % 12 === 0 ? 12 : h % 12) + "시" + (mi ? " " + mi + "분" : "");
+  }
+  function fmtMonthDay(iso) {
+    var k = new Date(Date.parse(iso) + 9 * 3600 * 1000);
+    return (k.getUTCMonth() + 1) + "월 " + k.getUTCDate() + "일";
+  }
+
   function bizPhone() {
     var b = state.catalog && state.catalog.business;
     return b && b.phone ? b.phone : "";
@@ -752,6 +838,7 @@
         "</div>" +
         '<div class="deadline"><p class="k"><span>입금 마감</span><span class="left" id="deadlineLeft">' + esc(timeLeft(d.depositDeadline)) + "</span></p>" +
         '<p class="v">' + esc(fmtDateTime(d.depositDeadline)) + "까지</p></div>" +
+        placeBox() +
         '<p class="live" id="liveLine">' + liveText() + "</p>" +
         '</div><div class="order-side">' +
         summaryHtml(d) +
@@ -763,12 +850,13 @@
       var done = d.status === "픽업완료";
       html =
         '<div class="narrow"><div class="confirmed-head">' +
-        '<div class="stamp" aria-hidden="true"><span><b>' + (done ? "픽업 완료" : "예약 확정") + "</b><small>" + (done ? "Thank you" : "Merry Christmas") + "</small></span></div>" +
+        '<div class="stamp" aria-hidden="true"><span><b>' + (done ? "픽업 완료" : "예약 확정") + "</b><small>" + (done ? "고맙습니다" : "메리 크리스마스") + "</small></span></div>" +
         '<h1 class="h-lg">' + (done ? "맛있게 드세요" : "예약이 확정되었어요") + "</h1>" +
         '<p class="muted">' + (done ? "올해도 함께해 주셔서 고마워요." : "입금이 확인되었어요. 픽업하실 때 주문번호를 알려 주세요.") + "</p>" +
         orderIdLine(d.orderId) +
         "</div>" +
-        (done ? "" : '<div class="pickup-big"><p class="k">픽업 일시</p><p class="v">' + esc(fmtDate(d.pickupDate)) + " " + esc(d.pickupTime) + "</p></div>") +
+        (done ? "" : '<div class="pickup-big"><p class="k">픽업 일시</p><p class="v">' + esc(fmtDate(d.pickupDate)) + " " + esc(d.pickupTime) + "</p></div>" + placeBox()) +
+        (done ? "" : noticeBox()) +
         summaryHtml(d) +
         '<div class="order-actions"><a class="btn btn-line btn-block" href="#">처음으로</a></div></div>';
     } else {

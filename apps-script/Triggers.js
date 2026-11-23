@@ -104,8 +104,8 @@ function checkDepositGap() {
     '그 뒤 들어온 주문: ' + ordersSince.length + '건',
     '',
     '아이폰 단축어 자동화가 멈췄거나 토스 알림이 꺼졌을 수 있어요.',
-    '토스 입금 내역과 Orders 탭을 대조해 입금된 주문은 status를 "확정"으로 바꿔 주세요.',
-    '단축어 설정은 docs/SHORTCUT.md를 보세요.'
+    '토스 입금 내역을 보고, 입금된 주문은 시트 [주문] 탭에서 "상태"를 "확정"으로 바꿔 주세요.',
+    '아이폰 알림이 계속 안 오면 만들어 준 사람에게 알려 주세요.'
   ].join('\n'));
   props.setProperty('LAST_DEPOSIT_GAP_WARNING', String(now));
 }
@@ -120,7 +120,7 @@ function checkDepositGap() {
 function handleOrdersEdit(e) {
   if (!e || !e.range) return;
   var sh = e.range.getSheet();
-  if (sh.getName() !== SHEET.ORDERS) return;
+  if (tableNameOf_(sh) !== SHEET.ORDERS) return;
 
   var toNotify = [];
   try {
@@ -173,7 +173,7 @@ function sendDailySummary() {
       ' | 마감 ' + formatDateTimeKo_(o.depositDeadline);
   };
   var depLine = function (d) {
-    return '- ' + cellStr_(d.depositId) + ' | ' + formatDateTimeKo_(cellStr_(d.receivedAt)) +
+    return '- ' + cellStr_(d.depositId) + ' | ' + formatDateTimeKo_(d.receivedAt) +
       ' | ' + (cellStr_(d.parsedName) || '?') + ' ' + (cellStr_(d.parsedAmount) ? formatWon_(cellNum_(d.parsedAmount)) : '?') +
       ' | ' + cellStr_(d.note);
   };
@@ -199,9 +199,9 @@ function sendDailySummary() {
     '■ 날짜별 확정 수량',
     Object.keys(counts).map(function (d) { return '- ' + d + ': ' + counts[d] + '개'; }).join('\n'),
     '',
-    '토스 입금 내역과 대조해 입금된 주문은 Orders 탭 status를 "확정"으로 바꿔 주세요.',
-    '미매칭 입금을 처리했다면 Deposits 탭 status를 "매칭완료"(주문을 찾은 경우) 또는 "무시"로 바꾸면 내일 목록에서 빠집니다.'
+    '토스 입금 내역을 보고, 입금된 주문은 시트 [주문] 탭에서 "상태"를 "확정"으로 바꿔 주세요.',
+    '확인할 입금을 처리했으면 [입금] 탭에서 그 줄의 "처리 상태"를 "매칭완료"(주문을 찾음) 또는 "무시"(케이크와 상관없는 입금)로 바꾸면 내일 목록에서 빠져요.'
   ].join('\n');
 
-  notifyOwner_(cfg, '매일 요약 ' + ymd_(new Date()), body);
+  notifyOwner_(cfg, '오늘의 예약 현황 (' + Utilities.formatDate(new Date(), TZ, 'M월 d일') + ')', body);
 }

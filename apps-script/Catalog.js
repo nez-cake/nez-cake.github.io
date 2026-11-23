@@ -38,6 +38,7 @@ function getCatalog_() {
       address: cfg.bizAddress,
       phone: cfg.bizPhone
     },
+    notices: cfg.notices,
     policies: {
       refund: cfg.refundPolicy,
       privacy: cfg.privacyNotice
@@ -45,8 +46,9 @@ function getCatalog_() {
   };
 }
 
+/** 설정의 "주문 받기"가 켜져 있고 접수 기간 안일 때만 열림. */
 function isOrderOpen_(cfg, now) {
-  return now.getTime() >= cfg.orderOpenAt.getTime() && now.getTime() <= cfg.orderCloseAt.getTime();
+  return cfg.orderEnabled && now.getTime() >= cfg.orderOpenAt.getTime() && now.getTime() <= cfg.orderCloseAt.getTime();
 }
 
 /** Products 탭에서 active인 상품을 sortOrder 순으로. */

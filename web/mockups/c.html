@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nez 목업 C · 한 화면형</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+/* 목업 C — 소개와 주문서를 한 페이지로. A안 styles.css 위에 배치만 바꾼다. */
+.one { display: block; }
+.one-photo { height: 45vh; min-height: 260px; background: #e9dfcf url("../assets/hero.webp") center 40% / cover no-repeat; }
+.one-body { padding: 26px var(--gutter) calc(var(--bar-h) + 30px); }
+.one-logo { display: flex; justify-content: space-between; align-items: center; }
+.one-logo .logo-name { font-size: 34px; }
+.one-logo a { font-size: 15px; border-bottom: 1px solid var(--ink); text-decoration: none; }
+.one .h-xl { font-size: 28px; margin-top: 18px; }
+.one .datebox { margin-top: 18px; }
+.place { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); font-size: 14px; color: var(--ink-2); }
+.place b { color: var(--ink); font-weight: 400; }
+.place a { white-space: nowrap; color: var(--ink); }
+.divider-title { display: flex; align-items: center; gap: 14px; margin: 46px 0 0; font-size: 15px; color: var(--ink-2); }
+.divider-title::before, .divider-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.one .summary .btn { flex: 1.25; }
+.one .sum-detail { display: none; }
+
+@media (min-width: 1080px) {
+  .one { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px) ; min-height: 100vh; }
+  .one-photo { position: sticky; top: 0; height: 100vh; min-height: 0; }
+  .one-body { padding: 40px 56px 40px; }
+  .one .h-xl { font-size: 36px; }
+  .one .summary { position: sticky; bottom: 0; top: auto; margin: 40px -56px 0; padding: 18px 56px; border: 0; border-top: 1px solid var(--line); background: var(--ivory); display: flex; }
+  .one .sum-total strong { font-size: 26px; }
+  .one .summary .btn { width: auto; }
+  .one .sum-label { display: none !important; }
+  .one .sum-meta { display: block !important; }
+  .times { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body class="has-bar">
+<div class="one">
+  <div class="one-photo" role="img" aria-label="원목 테이블 위 딸기 초코 홀케이크"></div>
+
+  <div class="one-body">
+    <div class="one-logo">
+      <span class="logo"><span class="logo-name">Nez</span><span class="logo-sub">coffee · parfait · cake</span></span>
+      <a href="#">주문 조회</a>
+    </div>
+
+    <p class="kicker" style="margin-top:26px">A slow, warm moment</p>
+    <h1 class="h-xl">Nez의 크리스마스<br>홀케이크를 예약받아요</h1>
+    <p class="lead">예약은 선착순으로 확정되며,준비된 수량이 모두 예약되면 마감됩니다.</p>
+
+    <ul class="cakes"><li><div><b>크리스마스 딸기 홀케이크</b><span class="desc">구성-마스카포네 우유 생크림,발로나 초코 제누와즈,생딸기,메리 크리스마스 레터링 버터 쿠키</span></div><span class="price">60,000원</span></li></ul>
+    <div class="datebox">
+      <div class="is-low"><div class="n">23</div><div class="w">수요일</div><span class="s">3개 남음</span></div>
+      <div><div class="n">24</div><div class="w">목요일</div><span class="s">예약 가능</span></div>
+      <div class="is-out"><div class="n">25</div><div class="w">금요일</div><span class="s">마감</span></div>
+    </div>
+    <p class="note">픽업 12:00 ~ 20:00 · 주문 후 24시간 안에 계좌이체</p>
+    <p class="place"><span>픽업 장소 <b>마포구 성미산로 29-1 1층 카페 네즈</b></span><a href="#">지도 보기</a></p>
+    <h2 class="story-title" style="margin-top:30px">픽업 안내</h2>
+    <ul class="notices">
+      <li class="no-dot">📍픽업 가능한 시간대 12:00pm~20:00pm</li>
+      <li class="no-dot">📍케이크 픽업 후 수평 수직을 맞추어 들어주세요
+생크림 케이크는 이틀 안으로 드시는 걸 권장합니다 꼭 냉장 보관 하시고 차가운 상태에서 드셔주세요😊</li>
+      <li class="no-dot">📍주문 제작 케이크는 이틀 전 부터 밑작업 준비 및 재료 준비를 해두기 때문에 노쇼 방지를 위해 계좌이체로 선결제받고 있어요
+2일 전 주문 취소 시 100%환불해드리고 있어요
+픽업 하루 전 취소 시 케이크 작업이 시작되기 때문에 전액 환불 안 되는 점 너른 양해 부탁드리겠습니다😊</li>
+      <li class="no-dot">📍케이크 나이프,성냥,실버 롱스틱 초1개 기본 구성입니다</li>
+    </ul>
+
+    <p class="divider-title">예약하기</p>
+
+    <div class="sec">
+      <div class="sec-t"><b>픽업 날짜</b><span>23 · 24 · 25일 중에서</span></div>
+      <div class="cal">
+        <p class="cal-h">12<small>월</small></p>
+        <div class="cal-g">
+          <div class="wd">일</div><div class="wd">월</div><div class="wd">화</div><div class="wd">수</div><div class="wd">목</div><div class="wd">금</div><div class="wd">토</div>
+          <div class="d"></div><div class="d"></div><div class="d">1</div><div class="d">2</div><div class="d">3</div><div class="d">4</div><div class="d">5</div>
+          <div class="d">6</div><div class="d">7</div><div class="d">8</div><div class="d">9</div><div class="d">10</div><div class="d">11</div><div class="d">12</div>
+          <div class="d">13</div><div class="d">14</div><div class="d">15</div><div class="d">16</div><div class="d">17</div><div class="d">18</div><div class="d">19</div>
+          <div class="d">20</div><div class="d">21</div><div class="d">22</div>
+          <label class="d is-low"><span class="c">23</span><span class="t">3개 남음</span></label>
+          <label class="d is-checked"><span class="c">24</span><span class="t">예약 가능</span></label>
+          <label class="d is-out"><span class="c">25</span><span class="t">마감</span></label>
+          <div class="d">26</div>
+          <div class="d">27</div><div class="d">28</div><div class="d">29</div><div class="d">30</div><div class="d">31</div><div class="d"></div><div class="d"></div>
+        </div>
+        <div class="cal-legend"><span><i style="background:var(--choco)"></i>선택</span><span><i style="background:var(--pink)"></i>마감</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-t"><b>픽업 시간</b><span>12월 24일 (목)</span></div>
+      <div class="times">
+        <div class="ap">낮</div>
+        <label>12:00</label><label>12:30</label><label>13:00</label><label>13:30</label><label>14:00</label><label class="is-checked">14:30</label><label>15:00</label><label>15:30</label><label>16:00</label><label>16:30</label><div class="fill"></div><div class="fill"></div>
+        <div class="ap">저녁</div>
+        <label>17:00</label><label>17:30</label><label>18:00</label><label>18:30</label><label>19:00</label><label>19:30</label><label>20:00</label><div class="fill"></div><div class="fill"></div><div class="fill"></div><div class="fill"></div><div class="fill"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2 class="sec-t"><b>주문하시는 분</b></h2>
+      <div class="field"><label>성함</label><input class="input" value="김민지"><p class="hint">입금자명도 이 성함으로 들어가요. <b>이 이름 그대로 입금해야 자동 확정됩니다.</b></p></div>
+      <details class="depositor"><summary><span>입금자명이 다른가요?</span></summary></details>
+      <div class="field"><label>연락처</label><input class="input" value="010-1234-5678"></div>
+      <div class="field"><span class="label">케이크 개수</span><div class="qty"><button>−</button><output>1</output><button>+</button></div><p class="hint">한 번에 2개까지 주문할 수 있어요.</p></div>
+    </div>
+
+    <div class="sec">
+      <label class="agree"><input type="checkbox" checked><span class="box"></span><span>개인정보 수집·이용에 동의합니다 <em>(필수)</em><small>수집 항목: 이름, 연락처 / 목적: 예약 확인과 픽업 안내 / 보관: 픽업 종료 후 환불 문의 기간까지</small></span></label>
+      <div class="refund-box"><p class="refund-title">환불·변경 규정</p><p class="refund-text">📍주문 제작 케이크는 이틀 전 부터 밑작업 준비 및 재료 준비를 해두기 때문에 노쇼 방지를 위해 계좌이체로 선결제받고 있어요
+2일 전 주문 취소 시 100%환불해드리고 있어요
+픽업 하루 전 취소 시 케이크 작업이 시작되기 때문에 전액 환불 안 되는 점 너른 양해 부탁드리겠습니다😊</p></div>
+    </div>
+
+    <aside class="summary">
+      <div class="sum-total"><span class="sum-meta">12/24 (목) 14:30 · 1개</span><strong>60,000원</strong></div>
+      <button class="btn btn-solid">주문하기</button>
+    </aside>
+
+    <footer style="margin-top:40px;font-size:13px;color:var(--ink-2);line-height:1.75"><span class="footer-logo">Nez</span><br>네즈 · 대표 홍경빈 · 사업자등록번호 698-20-01880<br>마포구 성미산로 29-1 1층 카페 네즈 · 010-4566-0446</footer>
+  </div>
+</div>
+</body>
+</html>

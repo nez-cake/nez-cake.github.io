@@ -52,6 +52,11 @@ function buildCustomerMail_(cfg, o, kind) {
   var account = cfg.bankName + ' ' + cfg.accountNumber + ' (예금주 ' + cfg.accountHolder + ')';
   var contact = cfg.bizPhone ? '\n문의: ' + cfg.bizPhone : '';
   var lettering = o.lettering ? '\n레터링: ' + o.lettering : '';
+  var refund = cfg.refundPolicy ? '\n\n[환불·변경 안내]\n' + cfg.refundPolicy : '';
+  var notices = cfg.notices && cfg.notices.length ? '\n\n[안내]\n' + cfg.notices.join('\n\n') : '';
+  // 안내 문구에 환불 규정이 이미 들어 있으면 확정 메일에서 두 번 쓰지 않는다.
+  var refundFirstLine = String(cfg.refundPolicy || '').split('\n')[0].trim();
+  var refundInNotices = !!refundFirstLine && (cfg.notices || []).some(function (n) { return n.indexOf(refundFirstLine) >= 0; });
 
   if (kind === 'received') {
     return {
@@ -71,7 +76,7 @@ function buildCustomerMail_(cfg, o, kind) {
         '입금 마감: ' + deadline,
         line,
         '',
-        '마감 시각까지 입금이 확인되지 않으면 주문이 자동으로 취소됩니다.' + contact
+        '마감 시각까지 입금이 확인되지 않으면 주문이 자동으로 취소됩니다.' + refund + contact
       ].join('\n')
     };
   }
@@ -88,7 +93,7 @@ function buildCustomerMail_(cfg, o, kind) {
         '픽업: ' + pickup,
         line,
         '',
-        '픽업하실 때 주문번호나 성함을 말씀해 주세요.' + contact
+        '픽업하실 때 주문번호나 성함을 말씀해 주세요.' + notices + (refundInNotices ? '' : refund) + contact
       ].join('\n')
     };
   }
@@ -129,19 +134,20 @@ function notifyOwner_(cfg, subject, body) {
 }
 
 function notifyOwnerUnmatched_(cfg, s) {
-  notifyOwner_(cfg, '확인이 필요한 입금 ' + s.depositId, [
-    '자동으로 처리하지 못한 입금 알림이 있어요. Deposits 탭과 토스 내역을 확인해 주세요.',
-    '해당 주문이 맞으면 Orders 탭에서 status를 "확정"으로 바꾸면 손님에게 확정 메일이 갑니다.',
+  notifyOwner_(cfg, '확인이 필요한 입금이 있어요 (' + (s.parsedName || '이름 모름') + (s.parsedAmount != null ? ', ' + formatWon_(s.parsedAmount) : '') + ')', [
+    '입금 알림이 들어왔는데 어느 주문인지 확실하지 않아 그대로 두었어요.',
+    '토스 입금 내역을 보고, 맞는 주문이 있으면 시트 [주문] 탭에서 그 주문의 "상태"를 "확정"으로 바꿔 주세요. 손님에게 확정 메일이 자동으로 가요.',
     '',
-    '입금번호: ' + s.depositId,
-    '수신 시각: ' + formatDateTimeKo_(s.receivedAt),
-    '읽은 입금자명: ' + (s.parsedName || '(없음)'),
-    '읽은 금액: ' + (s.parsedAmount != null ? formatWon_(s.parsedAmount) : '(없음)'),
-    '메모: ' + s.note,
+    '받은 시각: ' + formatDateTimeKo_(s.receivedAt),
+    '입금한 사람: ' + (s.parsedName || '(알림에서 찾지 못함)'),
+    '금액: ' + (s.parsedAmount != null ? formatWon_(s.parsedAmount) : '(알림에서 찾지 못함)'),
+    '이유: ' + s.note,
     '',
-    '알림 원문',
-    '제목: ' + s.title,
-    '내용: ' + s.body
+    '받은 알림 내용 그대로',
+    s.title,
+    s.body,
+    '',
+    '(시트 [입금] 탭 ' + s.depositId + ' 줄에도 적혀 있어요. 처리했으면 그 줄의 "처리 상태"를 "매칭완료"나 "무시"로 바꿔 두세요.)'
   ].join('\n'));
 }
 
