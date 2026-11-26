@@ -1,31 +1,35 @@
 /* =========================================================
-   Nez 크리스마스 홀케이크 예약 — 방향 A "영업 달력"
-   아이보리 종이, 굵기 대비 큰 세리프, 가는 회색 격자, 마감은 분홍 원.
+   Nez 크리스마스 홀케이크 예약 — 테마 "손그림 크리스마스 카드"
+   종이 질감 바탕, 남색 잉크 + 우체국 소인 빨강, 손그림 선 장식, 숫자는 Lora.
    색·글꼴은 :root 변수만 바꾸면 전체에 반영된다.
    ========================================================= */
 :root {
   /* 바탕 */
-  --ivory: #f8f4ec;        /* 페이지 */
+  --ivory: #fbf8f1;        /* 페이지(종이) */
   --paper: #fffdf8;        /* 달력·카드 */
-  --line: #d9d3c8;         /* 격자선 */
-  --line-soft: #e9e4da;
+  --line: #ddd3c3;         /* 격자선 */
+  --line-soft: #ebe4d7;
+  --dash: #c4b8a6;         /* 손으로 그은 점선 */
 
-  /* 글자 (ivory 위 대비: ink 15:1, ink-2 6.7:1, ink-3은 장식·비활성 전용) */
-  --ink: #1d1a17;
-  --ink-2: #5b544c;
-  --ink-3: #a39b90;
+  /* 글자 (ivory 위 대비: ink 13:1, ink-2 6.3:1, ink-3은 장식·비활성 전용) */
+  --ink: #2d2a26;
+  --ink-2: #625a50;
+  --ink-3: #a39a8e;
 
   /* 브랜드 */
-  --choco: #4a2f24;        /* 선택, 강조 면 */
+  --choco: #2f4a6d;        /* 남색 잉크: 선택, 강조 면, 버튼 (이름은 예전 그대로 둔다) */
+  --navy: #2f4a6d;
   --on-choco: #fffdf8;
-  --berry: #a8322a;        /* 남은 수량, 오류 (ivory 위 6:1) */
-  --pink: #f6d9d6;         /* 마감 원 (휴무일 원과 같은 느낌) */
-  --pink-ink: #8a4a44;     /* 분홍 원 위 글자 (5:1) */
+  --berry: #b4443a;        /* 소인 빨강: 남은 수량, 오류, 가격 (ivory 위 5.3:1) */
+  --pink: #f0e2dc;         /* 마감 원 */
+  --pink-ink: #8a4a42;     /* 분홍 원 위 글자 (5.4:1) */
   --wood: #c9a97c;
 
   /* 글꼴 */
-  --latin: "Bodoni Moda", "Times New Roman", serif;
-  --kr: "Gowun Batang", "Apple SD Gothic Neo", "Noto Serif KR", serif;
+  --latin: "Lora", Georgia, "Times New Roman", serif;     /* 숫자(가격·날짜·달력·시간·금액·계좌·주문번호) */
+  --kr: "Lora", "Gowun Dodum", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; /* 본문·버튼·안내·오류. 맨 앞 Lora는 숫자·기호·대문자만 있는 부분 글꼴이라 숫자만 Lora, 한글은 고운돋움 */
+  --logo: "Bodoni Moda", "Times New Roman", serif;       /* 로고 Nez만 */
+  --hand: "Nanum Pen Script", "Gowun Dodum", cursive;     /* 큰 제목 두 곳(소개 제목 첫 줄, 예약하기)만 */
 
   /* 크기 */
   --gutter: 22px;
@@ -265,7 +269,7 @@ h1, h2, .h-xl, .h-lg { text-wrap: balance; }
 .input::placeholder { color: #766d63; } /* 4.5:1 */
 .input:focus { border-bottom-width: 2px; padding-bottom: 7px; border-color: var(--choco); background: var(--paper); }
 .input:focus-visible { outline: none; }
-.input-code { font-family: var(--kr); letter-spacing: .08em; text-transform: uppercase; } /* Bodoni의 하이픈은 너무 가늘어 주문번호에는 쓰지 않는다 */
+.input-code { font-family: var(--latin); letter-spacing: .06em; text-transform: uppercase; }
 .hint { margin: 6px 0 0; font-size: 13px; color: var(--ink-2); }
 .hint b { color: var(--berry); font-weight: 700; }
 .err { margin: 6px 0 0; font-size: 14px; color: var(--berry); }
@@ -288,7 +292,7 @@ h1, h2, .h-xl, .h-lg { text-wrap: balance; }
 .qty { display: flex; align-items: center; justify-content: space-between; max-width: 260px; border: 1px solid var(--line); background: var(--paper); }
 .qty button { width: var(--tap); height: var(--tap); border: 0; background: transparent; font-size: 22px; cursor: pointer; }
 .qty button:disabled { color: var(--ink-3); cursor: not-allowed; }
-.qty output { font-weight: 700; font-size: 22px; } /* Bodoni의 1은 I처럼 보여 한글 글꼴로 */
+.qty output { font-family: var(--latin); font-weight: 600; font-size: 22px; } /* 개수 숫자도 Lora */
 
 .agree { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 16px; border: 1px solid var(--line); background: var(--paper); font-size: 15px; cursor: pointer; }
 .agree input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -379,7 +383,7 @@ h1, h2, .h-xl, .h-lg { text-wrap: balance; }
 .stamp::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1px solid var(--choco); }
 .stamp b { display: block; font-size: 22px; line-height: 1.2; }
 .stamp small { display: block; margin-top: 4px; font-family: var(--latin); font-style: italic; font-size: 13px; }
-@keyframes stamp { from { transform: scale(.7) rotate(-12deg); opacity: 0; } to { transform: rotate(-4deg); opacity: 1; } }
+@keyframes stamp { from { transform: scale(.7) rotate(-16deg); opacity: 0; } to { transform: rotate(-8deg); opacity: 1; } }
 .confirmed-head { text-align: center; }
 .confirmed-head .order-id { justify-content: center; }
 .pickup-big { margin-top: 22px; padding: 18px; border: 1px solid var(--line); background: var(--paper); text-align: center; }
@@ -520,8 +524,10 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
    ========================================================= */
 @media (min-width: 1080px) and (min-aspect-ratio: 9/8) {
   .home { display: grid; grid-template-columns: minmax(0, calc((100vh - 69px) * 1.15)) minmax(600px, 1fr); }
-  .home-photo { position: sticky; top: 69px; max-width: none; margin: 0; height: calc(100vh - 69px); }
+  .hero-wrap { position: sticky; top: 69px; height: calc(100vh - 69px); padding: 28px 30px; }
+  .home-photo { max-width: none; width: 100%; margin: 0; height: 100%; transform: rotate(-.8deg); }
   .home-photo img { height: 100%; aspect-ratio: auto; object-position: 50% 60%; }
+  .hero-wrap .postmark { width: 170px; right: 18px; bottom: 6px; }
   .home-body { max-width: 760px; margin: 0; padding: 48px 56px 0; }
   .summary {
     position: sticky; bottom: 0; left: auto; right: auto;
@@ -546,4 +552,107 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
   .sum-total span { font-size: 11px; }
   .sum-total strong { font-size: 20px; }
   .summary .btn { min-height: 44px; padding-top: 0; padding-bottom: 0; }
+}
+
+/* =========================================================
+   테마 "손그림 크리스마스 카드" (사장님이 고른 5번)
+   - 큰 제목 두 곳만 손글씨(--hand), 나머지 글은 고운돋움(--kr), 숫자는 Lora(--latin)
+   - 장식은 SVG 선 그림. 글·버튼을 가리지 않게 pointer-events: none
+   ========================================================= */
+body, .top { background: var(--ivory) url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22220%22%20height%3D%22220%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.85%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.45%20%200%200%200%200%20.38%20%200%200%200%200%20.28%20%200%200%200%20.06%200%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22220%22%20height%3D%22220%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E"); }
+.logo-name, .logo-sub, .footer-logo { font-family: var(--logo); }
+.num, .cakes .price, .datebox .n, .cal-h, .cal-g .d, .sum-total strong, .paycard-amount dd { font-variant-numeric: lining-nums; }
+.cakes .price { color: var(--berry); font-weight: 600; }
+.datebox .n, .cal-h { font-weight: 600; }
+.sum-total strong, .paycard-amount dd { font-weight: 600; }
+.paycard-row dd.num, .order-id code { font-family: var(--latin); font-weight: 600; letter-spacing: .03em; } /* Lora 하이픈은 또렷하다 */
+.order-id code { font-weight: 500; }
+.steps i { font-style: normal; font-weight: 600; }
+.depositor summary::after { font-family: var(--kr); }
+
+/* 작은 머리말: 본문 글꼴(읽기 쉽게). 소개의 영어 한 줄만 손글씨 */
+.kicker { font-family: var(--kr); font-style: normal; font-size: 14px; color: var(--berry); }
+#introKicker { font-family: var(--hand); font-size: 25px; line-height: 1.1; }
+.h-xl { font-size: 26px; }
+.h-xl .hw { display: block; margin-bottom: 4px; font-family: var(--hand); font-weight: 400; font-size: 48px; line-height: 1.05; letter-spacing: 0; color: var(--navy); }
+.divider-title { margin-top: 0; }
+.divider-title span { font-family: var(--hand); font-weight: 400; font-size: 36px; line-height: 1; color: var(--navy); }
+.divider-title::before, .divider-title::after { height: 0; background: none; border-top: 1.5px dashed var(--dash); }
+
+/* 손그림 장식 */
+.home-body { position: relative; }
+.deco { display: block; pointer-events: none; }
+.deco-tree { position: absolute; right: var(--gutter); top: 28px; width: 52px; height: auto; }
+#introKicker, #introTitle { padding-right: 60px; }
+.sub-title { display: flex; align-items: center; gap: 10px; }
+.deco-bow { display: inline-block; width: 48px; height: auto; }
+.deco-cake { flex: none; width: 62px; height: auto; margin-left: -4px; }
+
+/* 대표 사진: 톱니 모양 우표 틀 + 소인. 사진은 자르지 않는다(1단: 6:5 전체) */
+.hero-wrap { position: relative; padding: 18px 16px 10px; }
+.home-photo {
+  padding: 10px; background: var(--paper); transform: rotate(-1.2deg);
+  max-width: min(720px, calc((100vh - 72px - var(--bar-h) - var(--safe-bottom) - 50px) * 6 / 5 + 20px));
+  max-width: min(720px, calc((100svh - 72px - var(--bar-h) - var(--safe-bottom) - 50px) * 6 / 5 + 20px));
+  -webkit-mask: radial-gradient(circle 5px at 50% 50%, transparent 98%, #000) -7px -7px / 14px 14px, linear-gradient(#000, #000) 7px 7px / calc(100% - 14px) calc(100% - 14px) no-repeat;
+  mask: radial-gradient(circle 5px at 50% 50%, transparent 98%, #000) -7px -7px / 14px 14px, linear-gradient(#000, #000) 7px 7px / calc(100% - 14px) calc(100% - 14px) no-repeat;
+}
+.postmark { position: absolute; right: max(8px, calc(50% - 380px)); bottom: -14px; width: 104px; height: auto; transform: rotate(-8deg); opacity: .88; pointer-events: none; }
+
+/* 손으로 그은 점선과 사진 카드 */
+.cakes, .cakes li { border-top-style: dashed; border-bottom-style: dashed; border-color: var(--dash); }
+.datebox { border: 1.5px dashed var(--dash); }
+.datebox > div { border-right: 1.5px dashed var(--line); }
+.cake-cut img { padding: 6px; background: var(--paper); box-shadow: 0 3px 10px rgba(60, 40, 20, .12); transform: rotate(.6deg); }
+.place { border-top-style: dashed; border-bottom-style: dashed; border-color: var(--dash); }
+
+/* 버튼: 남색 잉크, 살짝 둥근 모서리 */
+.btn { border-radius: 4px; }
+.btn-solid { background: var(--navy); border-color: var(--navy); color: var(--on-choco); }
+.btn-solid:active { background: #243a57; border-color: #243a57; }
+.btn-line { border-color: var(--navy); color: var(--navy); }
+.copy { border-color: var(--navy); color: var(--navy); border-radius: 4px; }
+.copy.is-done { background: var(--navy); color: var(--on-choco); }
+
+/* 달력 선택 원: 손으로 그린 듯 살짝 찌그러진 원 */
+.cal-g .d.is-checked .c { border-radius: 46% 54% 50% 50% / 55% 45% 55% 45%; }
+
+/* 주문서: 항공우편 줄무늬 테두리 카드 */
+.order-form { margin: 44px -6px 0; padding: 30px 16px 26px; background: var(--paper); border: 9px solid transparent;
+  border-image: repeating-linear-gradient(-45deg, #b4443a 0 10px, #fffdf8 10px 18px, #2f4a6d 18px 28px, #fffdf8 28px 36px) 9; }
+
+/* 아래 고정 바 */
+.summary { background: var(--paper); border-top: 1.5px dashed var(--dash); }
+
+/* 입금 안내·예약 확정·조회의 카드: 점선 테두리 */
+.paycard, .deadline, .pickup-big, .place-box { border: 1.5px dashed var(--dash); }
+.order-side .osum { border: 1.5px dashed var(--dash); }
+
+/* 예약 확정 도장 → 우체국 소인 */
+.stamp { width: 150px; height: 150px; margin: 8px auto 26px; border: 2px solid var(--berry); color: var(--berry); transform: rotate(-8deg); left: -28px; }
+.stamp::before { inset: 8px; border: 1.5px solid var(--berry); }
+.stamp::after { content: ""; position: absolute; left: calc(100% + 4px); top: 42px; width: 88px; height: 60px; background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2096%2064%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23b4443a%22%20stroke-width%3D%222.4%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M2%2012%20C18%204%2034%2020%2050%2012%20C64%205%2080%208%2094%2013%20M2%2032%20C18%2024%2034%2040%2050%2032%20C64%2025%2080%2028%2094%2033%20M2%2052%20C18%2044%2034%2060%2050%2052%20C64%2045%2080%2048%2094%2053%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") no-repeat center / contain; opacity: .9; }
+.stamp b { font-size: 22px; }
+.stamp small { font-family: var(--hand); font-style: normal; font-size: 20px; margin-top: 2px; }
+
+/* 접수 전·마감 안내 */
+.closed { border: 1.5px dashed var(--pink-ink); }
+
+@media (min-width: 768px) {
+  .deco-tree { width: 60px; }
+  .order-form { margin-left: 0; margin-right: 0; padding: 34px 28px 30px; }
+  .postmark { width: 128px; }
+}
+/* PC 2단: 위 테마 규칙보다 뒤에 와야 한다 (styles.css 앞쪽 2단 블록과 같은 조건)
+   좁은 2단(1080~1279px)은 사진 칸이 좁아 좌우 틀 여백을 줄인다(케이크 받침이 잘리지 않게) */
+@media (min-width: 1080px) and (min-aspect-ratio: 9/8) {
+  .hero-wrap { position: sticky; top: 69px; height: calc(100vh - 69px); padding: 28px 30px; }
+  .home-photo { max-width: none; width: 100%; margin: 0; height: 100%; transform: rotate(-.8deg); }
+  .home-photo img { height: 100%; aspect-ratio: auto; object-position: 50% 60%; }
+  .hero-wrap .postmark { width: 170px; right: 20px; bottom: 8px; }
+  .deco-tree { right: 56px; top: 44px; }
+  .order-form { margin-bottom: 40px; }
+}
+@media (min-width: 1080px) and (max-width: 1279px) and (min-aspect-ratio: 9/8) {
+  .hero-wrap { padding-left: 14px; padding-right: 14px; }
 }

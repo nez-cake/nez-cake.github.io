@@ -21,7 +21,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <!-- 숫자 글꼴 Lora: 숫자·기호·영문 대문자만 받아 온다(text=). 본문 글꼴 맨 앞에 두어 페이지의 모든 숫자가 Lora로 보인다 -->
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&display=swap&text=0123456789%2C.%3A-~%2F%25ABCDEFGHIJKLMNOPQRSTUVWXYZ" rel="stylesheet">
+  <!-- 로고 "Nez"와 부제만 보도니: 그 글자만 받아 온다(text=) -->
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&display=swap&text=Nezcofeparitk%C2%B7%20" rel="stylesheet">
   <!--
     버전 꼬리표 규칙 (예전 파일이 브라우저에 남아 화면이 깨지는 것을 막는다)
     - styles.css, config.js, mock/mock-api.js, app.js 를 고치면, 아래 네 주소의 ?v= 값을 모두 새 값으로 올린다.
@@ -29,7 +33,7 @@
     - 네 파일 모두 같은 값을 쓴다. 하나만 고쳐도 네 개를 함께 올린다(헷갈리지 않게).
     - index.html 자체에는 꼬리표를 붙일 수 없다. GitHub Pages는 파일을 10분쯤 캐시하므로, 배포 직후 10분 안에는 예전 화면이 보일 수 있다(그래도 짝이 맞는 파일끼리 열려 깨지지 않는다).
   -->
-  <link rel="stylesheet" href="styles.css?v=20261126e">
+  <link rel="stylesheet" href="styles.css?v=20261127b">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -67,15 +71,19 @@
       <div class="home">
         <!-- 사진·제목·설명은 API를 기다리지 않고 바로 보인다. 가격·날짜·수량 자리만 뼈대로 있다가 채워진다. -->
         <!-- 대표 사진: 1단 배치는 hero-single(12번을 6:5로 잘라 케이크 전체가 들어감), PC 2단(1080px~ 그리고 가로/세로 9/8 이상, styles.css와 같은 조건) 왼쪽 고정 칸은 세로 사진(12) -->
+        <div class="hero-wrap">
         <picture class="home-photo" id="heroPhoto">
           <source media="(min-width: 1080px) and (min-aspect-ratio: 9/8)" srcset="assets/hero-tall.webp" width="1200" height="1600">
           <img src="assets/hero-single.webp" width="1200" height="1000" fetchpriority="high" decoding="async"
             alt="크리스마스 트리 앞 나무 테이블에 놓인 딸기 생크림 홀케이크. 메리 크리스마스 쿠키와 촛불이 꽂혀 있어요.">
         </picture>
+        <svg class="postmark" viewBox="0 0 200 110" aria-hidden="true" focusable="false"><g fill="none" stroke="#b4443a" stroke-width="2.2"><circle cx="55" cy="55" r="44"/><circle cx="55" cy="55" r="34"/><path d="M104 34 C124 26 144 42 164 34 C176 30 186 32 196 36 M104 55 C124 47 144 63 164 55 C176 51 186 53 196 57 M104 76 C124 68 144 84 164 76 C176 72 186 74 196 78"/></g><g fill="#b4443a" font-family="Lora, Georgia, serif" font-weight="600" text-anchor="middle"><text x="55" y="51" font-size="14" letter-spacing="1.5">NEZ</text><text x="55" y="67" font-size="12">2026.12</text></g></svg>
+        </div>
 
         <div class="home-body">
+          <svg class="deco deco-tree" viewBox="0 0 80 100" aria-hidden="true" focusable="false"><g fill="none" stroke="#2f4a6d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M40 10 L22 38 L32 37 L16 62 L28 61 L12 86 L68 86 L52 61 L64 62 L48 37 L58 38 Z"/><path d="M36 86 L36 96 L44 96 L44 86"/><path d="M27 50 C35 56 46 54 55 47" stroke="#b4443a"/><path d="M22 72 C34 80 50 78 61 70" stroke="#b4443a"/><path d="M40 2 l2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3 5-1z" stroke="#b4443a" stroke-width="1.8"/></g></svg>
           <p class="kicker" id="introKicker">A slow, warm moment</p>
-          <h1 class="h-xl" id="introTitle"><span id="introCafe">Nez</span>의 크리스마스<br>홀케이크를 예약받아요</h1>
+          <h1 class="h-xl" id="introTitle"><span class="hw"><span id="introCafe">Nez</span>의 크리스마스</span> 홀케이크를 예약받아요</h1>
           <p class="lead" id="introLead">예약은 선착순으로 확정되며,준비된 수량이 모두 예약되면 마감됩니다.</p>
 
           <div id="introData" aria-busy="true">
@@ -100,7 +108,7 @@
 
           <!-- 픽업 안내: catalog notices. 비어 있으면 숨긴다 -->
           <section class="notice-sec" id="story" aria-labelledby="noticeTitle" hidden>
-            <h2 class="sub-title" id="noticeTitle">픽업 안내</h2>
+            <h2 class="sub-title" id="noticeTitle">픽업 안내 <svg class="deco deco-bow" viewBox="0 0 100 60" aria-hidden="true" focusable="false"><g fill="none" stroke="#b4443a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M50 24 C34 6 14 10 18 24 C22 36 42 32 50 24 C58 32 78 36 82 24 C86 10 66 6 50 24Z"/><path d="M47 27 C42 40 36 48 28 56"/><path d="M53 27 C58 40 64 48 72 56"/><circle cx="50" cy="25" r="4"/></g></svg></h2>
             <ul class="notices" id="introNotices"></ul>
           </section>
 
@@ -114,7 +122,7 @@
           <p class="closed" id="closedNotice" role="status" hidden></p>
 
           <form id="orderForm" class="order-form" novalidate autocomplete="on" aria-labelledby="formTitle" hidden>
-            <h2 class="divider-title" id="formTitle">예약하기</h2>
+            <h2 class="divider-title" id="formTitle"><span>예약하기</span><svg class="deco deco-cake" viewBox="0 0 120 100" aria-hidden="true" focusable="false"><g fill="none" stroke="#2f4a6d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 52 C20 46 100 46 100 52 L100 84 C100 92 20 92 20 84 Z"/><path d="M20 52 C24 60 32 52 38 60 C44 52 52 60 60 54 C68 60 76 52 82 60 C88 52 96 60 100 52"/><path d="M60 46 L60 26"/><path d="M60 22 C63 16 61 12 60 8 C58 13 56 16 60 22Z" stroke="#b4443a"/><path d="M34 48 c-3-6 3-9 6-4 c3-5 9-2 6 4" stroke="#b4443a"/><path d="M74 48 c-3-6 3-9 6-4 c3-5 9-2 6 4" stroke="#b4443a"/><path d="M12 92 L108 92"/></g></svg></h2>
 
           <fieldset class="sec" data-field="productId" id="cakeField" aria-describedby="err-productId" hidden>
             <legend class="sec-t"><b>케이크</b></legend>
@@ -264,8 +272,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js?v=20261126e"></script>
-  <script src="mock/mock-api.js?v=20261126e"></script>
-  <script src="app.js?v=20261126e"></script>
+  <script src="config.js?v=20261127b"></script>
+  <script src="mock/mock-api.js?v=20261127b"></script>
+  <script src="app.js?v=20261127b"></script>
 </body>
 </html>

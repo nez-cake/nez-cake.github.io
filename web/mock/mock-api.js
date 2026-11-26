@@ -10,6 +10,7 @@
  * 조회 데모: 김민지 / 010-1234-5678 → 1건, 이준호 / 010-2222-3333 → 2건, 그 밖 → 없음
  *
  * 실제 API로 배포된 뒤에도 주소에 ?mock=1 을 붙이면 가짜 API로 볼 수 있다.
+ * ?closed=before / ?closed=after 를 함께 붙이면 접수 전 / 마감 후 화면을 볼 수 있다.
  * JSON을 fetch로 읽으므로 file://이 아니라 로컬 서버로 띄운다.
  *   예) web 폴더에서  python -m http.server 8000
  */
@@ -97,6 +98,13 @@
         });
       });
       if (s.settings.closed) j.data.order.isOpen = false;
+      // 확인용: 주소에 ?closed=before(접수 전) 또는 ?closed=after(마감 후)
+      var cm = /[?&]closed=(before|after)/.exec(location.search);
+      if (cm) {
+        j.data.order.isOpen = false;
+        if (cm[1] === "after") { j.data.order.openAt = "2026-11-01T10:00:00+09:00"; j.data.order.closeAt = "2026-11-20T23:59:00+09:00"; }
+        else { j.data.order.openAt = "2099-12-01T10:00:00+09:00"; }
+      }
       return j;
     });
   }
