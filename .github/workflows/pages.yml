@@ -1,4 +1,6 @@
 # web/ 폴더를 https://nez-cake.github.io/ 로 배포한다.
+# 올리기(build)와 내보내기(deploy)를 두 단계로 나눈다. 한 단계에 넣으면
+# 방금 올린 묶음을 내보내기 단계가 못 찾는 일이 있었다.
 name: Deploy web to GitHub Pages
 
 on:
@@ -17,20 +19,24 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
           path: web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-# 2026-11-24: 배포 다시 실행
