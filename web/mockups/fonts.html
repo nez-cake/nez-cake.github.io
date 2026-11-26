@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nez 숫자 글꼴 비교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@400;600&family=Playfair+Display:wght@400;600&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+/* 숫자 글꼴 후보 비교: 같은 화면 조각을 후보별로 나란히 (폰 너비 375px 기준).
+   글자(한글)는 지금 페이지와 같은 고운바탕, 숫자만 후보 글꼴. 로고 Nez는 지금 글꼴(Bodoni Moda) 그대로. */
+:root { --ivory:#f8f4ec; --paper:#fffdf8; --line:#e2d9cb; --line-soft:#ece5d9; --ink:#2a2420; --ink-2:#5b544c; --ink-3:#a39a8e; --choco:#4a2f24; --berry:#a8322a; --pink:#f6d9d6; --pink-ink:#8a4a44; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #e9e4da; color: var(--ink); font-family: "Gowun Batang", serif; -webkit-font-smoothing: antialiased; }
+.wrap { display: flex; gap: 18px; padding: 18px; width: max-content; }
+.col { width: 375px; background: var(--ivory); padding: 0 0 18px; }
+.cand { padding: 16px 20px 14px; background: var(--choco); color: #f8f0e3; }
+.cand b { display: block; font-size: 26px; line-height: 1.25; }
+.cand span { display: block; margin-top: 2px; font-size: 13px; opacity: .85; }
+.logo { padding: 12px 20px; border-bottom: 1px solid var(--line-soft); font-family: "Bodoni Moda", serif; font-weight: 600; font-size: 28px; line-height: 1; }
+.part { padding: 14px 20px 0; }
+.part > i { display: block; margin-bottom: 6px; font-style: normal; font-size: 11px; color: var(--ink-3); letter-spacing: .04em; }
+.num { font-family: var(--num); font-weight: var(--num-w, 400); font-variant-numeric: lining-nums; }
+/* 가격 줄 */
+.cake { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.cake b { font-size: 17px; } .cake .num { font-size: 24px; white-space: nowrap; }
+/* 날짜 3칸 */
+.dates { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: var(--paper); }
+.dates > div { padding: 12px 4px 10px; text-align: center; border-right: 1px solid var(--line); } .dates > div:last-child { border-right: 0; }
+.dates .n { font-size: 32px; line-height: 1; } .dates .w { margin-top: 4px; font-size: 12px; color: var(--ink-2); }
+.dates .s { display: inline-block; margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+.dates .low .s { color: var(--berry); } .dates .out .n { color: var(--ink-3); } .dates .out .s { padding: 0 9px; border-radius: 999px; background: var(--pink); color: var(--pink-ink); }
+/* 달력 한 주 */
+.week { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid var(--line); background: var(--paper); }
+.week .h { padding: 4px 0; text-align: center; font-size: 12px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+.week .d { min-height: 58px; padding: 6px 0; text-align: center; font-size: 17px; color: var(--ink-3); }
+.week .d .c { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; line-height: 1; }
+.week .d .t { display: block; font-family: "Gowun Batang", serif; font-size: 11px; line-height: 1.2; }
+.week .on { color: var(--ink); } .week .low .t { color: var(--berry); }
+.week .sel .c { background: var(--choco); color: #f8f0e3; } .week .out .c { background: var(--pink); color: var(--pink-ink); } .week .out .t { color: var(--pink-ink); }
+/* 시간표 한 줄 */
+.times { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); background: var(--paper); }
+.times span { display: grid; place-items: center; min-height: 48px; font-size: 17px; border-right: 1px solid var(--line-soft); } .times span:last-child { border-right: 0; }
+.times .sel { background: var(--choco); color: #f8f0e3; }
+/* 아래 고정 바 */
+.bar { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--line); background: var(--ivory); }
+.bar .tot { flex: 1; line-height: 1.3; } .bar .tot small { display: block; font-size: 12px; color: var(--ink-2); } .bar .tot .num { font-size: 24px; white-space: nowrap; }
+.bar .btn { flex: 1.2; display: grid; place-items: center; min-height: 50px; background: var(--ink); color: var(--paper); font-weight: 700; }
+/* 입금 안내 */
+.pay { border: 1px solid var(--line); background: var(--paper); }
+.pay .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); } .pay .row:last-child { border-bottom: 0; }
+.pay .k { font-size: 12px; color: var(--ink-2); } .pay .amt { font-size: 36px; line-height: 1.15; } .pay .acc { font-size: 20px; letter-spacing: .03em; font-weight: 600; }
+.pay .copy { flex: none; padding: 9px 12px; border: 1px solid var(--ink); font-size: 13px; font-weight: 700; }
+
+.f1 { --num: "Bodoni Moda", serif; }
+.f2 { --num: "Gowun Batang", serif; --num-w: 700; }
+.f3 { --num: "Noto Serif KR", serif; --num-w: 600; }
+.f4 { --num: "Playfair Display", serif; --num-w: 600; }
+.f5 { --num: "Pretendard", "Pretendard Variable", sans-serif; --num-w: 600; }
+.f6 { --num: "Lora", serif; --num-w: 600; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap"></div>
+<script>
+var C = [
+  ["f1", "① 지금 (보도니)", "Bodoni Moda · 비교용"],
+  ["f2", "② 고운바탕 숫자", "Gowun Batang · 본문과 같은 글꼴"],
+  ["f3", "③ 본명조", "Noto Serif KR · 또렷한 명조"],
+  ["f4", "④ 플레이페어", "Playfair Display · 지금 느낌, 더 굵은 획"],
+  ["f5", "⑤ 프리텐다드 (고딕)", "Pretendard · 가장 또렷함"],
+  ["f6", "⑥ 로라 (추천 후보)", "Lora · 따뜻한 세리프, 획이 고름"]
+];
+function week() {
+  var h = "일월화수목금토".split("").map(function (d) { return '<div class="h">' + d + "</div>"; }).join("");
+  var d = [20, 21, 22, 23, 24, 25, 26].map(function (n) {
+    if (n === 23) return '<div class="d on low"><span class="c num">23</span><span class="t">3개 남음</span></div>';
+    if (n === 24) return '<div class="d on sel"><span class="c num">24</span><span class="t">선택함</span></div>';
+    if (n === 25) return '<div class="d on out"><span class="c num">25</span><span class="t">마감</span></div>';
+    return '<div class="d"><span class="c num">' + n + "</span></div>";
+  }).join("");
+  return '<div class="week">' + h + d + "</div>";
+}
+document.getElementById("wrap").innerHTML = C.map(function (c) {
+  return '<section class="col ' + c[0] + '" id="' + c[0] + '">' +
+    '<div class="cand"><b>' + c[1] + "</b><span>" + c[2] + "</span></div>" +
+    '<div class="logo">Nez</div>' +
+    '<div class="part"><i>가격 줄</i><div class="cake"><b>크리스마스 딸기 홀케이크</b><span class="num">60,000원</span></div></div>' +
+    '<div class="part"><i>날짜 3칸</i><div class="dates"><div class="low"><div class="n num">23</div><div class="w">수요일</div><span class="s">3개 남음</span></div><div><div class="n num">24</div><div class="w">목요일</div><span class="s">예약 가능</span></div><div class="out"><div class="n num">25</div><div class="w">금요일</div><span class="s">마감</span></div></div></div>' +
+    '<div class="part"><i>달력 한 주</i>' + week() + "</div>" +
+    '<div class="part"><i>시간표 한 줄</i><div class="times"><span class="num">12:00</span><span class="num">12:30</span><span class="num sel">13:00</span><span class="num">18:30</span></div></div>' +
+    '<div class="part"><i>아래 고정 바</i><div class="bar"><div class="tot"><small>결제 금액</small><span class="num">60,000원</span></div><span class="btn">주문하기</span></div></div>' +
+    '<div class="part"><i>입금 안내</i><div class="pay"><div class="row"><div><div class="k">입금하실 금액</div><div class="amt num">60,000원</div></div><span class="copy">복사</span></div>' +
+    '<div class="row"><div><div class="k">계좌번호</div><div class="acc num">1000-1234-5678</div></div><span class="copy">복사</span></div></div></div>' +
+    "</section>";
+}).join("");
+</script>
+</body>
+</html>

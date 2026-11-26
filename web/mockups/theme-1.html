@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nez 테마 목업 1 · 남색 리본</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== 공통 구조 (테마와 무관) ===== */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+p,li,dd{text-wrap:pretty} h1,h2{text-wrap:balance}
+.nw{white-space:nowrap}
+.num{font-family:var(--num);font-variant-numeric:lining-nums tabular-nums}
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;min-height:64px;padding:8px 20px;background:var(--top-bg,var(--bg));color:var(--top-ink,var(--ink));border-bottom:1px solid var(--line)}
+.logo{line-height:1}.logo b{display:block;font-family:"Bodoni Moda",serif;font-weight:600;font-size:30px;letter-spacing:-.01em}
+.logo small{display:block;margin-top:4px;font-family:"Bodoni Moda",serif;font-size:10px;letter-spacing:.14em;opacity:.8}
+.top a{color:inherit;font-size:15px;text-decoration:none;border-bottom:1px solid currentColor;padding:6px 0}
+.hero{position:relative}
+.hero picture{display:block;max-width:720px;margin:0 auto}
+.hero img{display:block;width:100%;height:auto;aspect-ratio:6/5;object-fit:cover}
+.body{position:relative}
+.sec{position:relative;padding:30px 20px}
+.kicker{margin:0;font-family:var(--title-latin);font-style:italic;font-size:17px;color:var(--kicker,var(--muted))}
+h1{margin:8px 0 12px;font-family:var(--title);font-weight:var(--title-w,700);font-size:30px;line-height:1.3}
+.lead{margin:0 0 22px;color:var(--muted)}
+.cake{display:flex;justify-content:space-between;gap:14px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cake b{display:block;font-size:18px}.cake .desc{display:block;margin-top:4px;font-size:14px;color:var(--muted)}
+.price{flex:none;font-size:24px;font-weight:600;line-height:1.2}
+.cut{margin:16px 0 0}.cut img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.cut figcaption{margin-top:6px;font-size:13px;color:var(--muted)}
+.dates{display:grid;grid-template-columns:repeat(3,1fr);margin:22px 0 8px;border:1px solid var(--line)}
+.dates>div{padding:14px 4px 12px;text-align:center;border-right:1px solid var(--line)}.dates>div:last-child{border-right:0}
+.dates .n{font-size:30px;font-weight:600;line-height:1}.dates .w{margin-top:4px;font-size:12px;color:var(--muted)}
+.dates .s{display:inline-block;margin-top:8px;padding:1px 9px;font-size:13px;border-radius:999px}
+.facts{margin:10px 0 18px;font-size:14px;line-height:1.5}.facts div{display:flex;gap:14px;padding:3px 0}
+.facts dt{flex:none;width:5em;color:var(--muted)}.facts dd{margin:0}
+.place{display:grid;grid-template-columns:1fr auto;align-items:center;padding:8px 0 12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
+.place a{color:var(--ink);min-height:40px;display:inline-flex;align-items:center}.place b{grid-column:1/-1;color:var(--ink);font-weight:400;font-size:15px}
+h2{margin:0 0 10px;font-family:var(--title);font-size:20px;font-weight:var(--title-w,700)}
+.notices{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.notices li{white-space:pre-line;padding:12px 0;border-bottom:1px solid var(--line);line-height:1.6;font-size:15px}
+.divider{display:flex;align-items:center;gap:14px;margin:0 0 24px;font-family:var(--title);font-weight:700;font-size:17px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+.lbl{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 10px}.lbl b{font-size:17px}.lbl span{font-size:13px;color:var(--muted)}
+.cal{border:1px solid var(--line);background:var(--card)}
+.cal-h{margin:0;padding:10px;text-align:center;font-size:15px;border-bottom:1px solid var(--line)}.cal-h b{font-size:30px;font-weight:600;margin-right:2px}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal-g .wd{padding:6px 0;text-align:center;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.cal-g .d{min-height:54px;padding:6px 1px;text-align:center;font-family:var(--num);font-size:16px;color:var(--faint);border-bottom:1px solid var(--line-soft)}
+.cal-g .d .c{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;line-height:1}
+.cal-g .d .t{display:block;font-family:var(--body);font-size:11px;line-height:1.2}
+.cal-g .d.on{color:var(--ink);font-weight:600}
+.cal-legend{display:flex;gap:16px;margin:0;padding:10px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.cal-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.times{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:var(--card)}
+.times .ap{grid-column:1/-1;margin:0;padding:4px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.tm{display:grid;place-items:center;min-height:46px;font-family:var(--num);font-size:16px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.field{margin-top:18px}.field label{display:block;font-size:14px;color:var(--muted)}
+.field .in{display:block;width:100%;padding:10px 2px;border:0;border-bottom:1px solid var(--ink);background:transparent;color:var(--ink);font:inherit;font-size:17px}
+.qty{display:inline-grid;grid-template-columns:48px 72px 48px;align-items:center;margin-top:6px;border:1px solid var(--line);background:var(--card);text-align:center}
+.qty span{min-height:46px;display:grid;place-items:center;font-size:20px}.qty .num{font-size:19px}
+.agree{display:flex;gap:12px;margin-top:22px;padding:14px;border:1px solid var(--line);background:var(--card);font-size:15px}
+.agree i{flex:none;width:22px;height:22px;border:1.5px solid var(--ink);margin-top:2px}
+.agree small{display:block;margin-top:4px;font-size:13px;color:var(--muted);white-space:pre-line}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:14px;min-height:76px;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bar-bg,var(--bg));color:var(--bar-ink,var(--ink));border-top:1px solid var(--line)}
+.bar .tot{flex:1;min-width:0;line-height:1.25}.bar .tot span{display:block;font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar .tot b{font-size:24px;font-weight:600}
+.btn{flex:1.25;display:grid;place-items:center;min-height:52px;font-size:17px;font-weight:700;background:var(--btn-bg);color:var(--btn-ink);border-radius:var(--btn-r,0)}
+.foot-space{height:96px}
+@media (min-width:768px){.sec{padding:36px 40px}.body{max-width:720px;margin:0 auto}.times{grid-template-columns:repeat(6,1fr)}.bar{padding-left:calc(50% - 320px);padding-right:calc(50% - 320px)}}
+@media (min-width:1080px){
+  .page{display:grid;grid-template-columns:minmax(0,1fr) minmax(600px,640px)}
+  .hero{position:sticky;top:64px;height:calc(100vh - 64px);overflow:hidden}
+  .hero picture{max-width:none;height:100%}
+  .hero img{height:100%;aspect-ratio:auto;object-position:50% 60%}
+  .body{max-width:none;margin:0;display:flex;flex-direction:column;min-height:calc(100vh - 64px)}
+  .sec{padding:40px 52px}
+  .bar{position:sticky;margin-top:auto;padding:16px 52px}
+  .foot-space{display:none}
+  h1{font-size:36px}
+}
+/* ===== 테마: 남색 리본 ===== */
+
+.t1{--bg:#f6f1e7;--ink:#1d2742;--muted:#56607a;--faint:#a9aebb;--line:#d8d3c6;--line-soft:#e7e2d6;--card:#fbf8f1;
+  --body:"Noto Serif KR",serif;--title:"Noto Serif KR",serif;--title-latin:"Cormorant Garamond",serif;--num:"Noto Serif KR",serif;
+  --top-bg:#1d2742;--top-ink:#f3ecdc;--bar-bg:#1d2742;--bar-ink:#f3ecdc;--btn-bg:#f3ecdc;--btn-ink:#1d2742;--btn-r:999px}
+.t1 .top{border-bottom-color:#2f3a5a}
+.t1 .hero{background:#1d2742;padding:0 0 4px;overflow:hidden}
+.t1 .hero img{border-bottom:4px solid #b9cfe4}
+.t1 .rb{position:absolute;top:-6px;width:58px;height:270px;z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.t1 .rb-l{left:6px}.t1 .rb-r{right:6px}
+.t1 .intro{background:#1d2742;color:#f3ecdc;--muted:#c3c9d8;--line:#3b4766;--kicker:#b9cfe4;overflow:hidden}
+.t1 .intro .lights{position:absolute;inset:0;pointer-events:none;opacity:.9;
+  background:radial-gradient(circle,#ffe9b0 0 1.6px,transparent 2.4px) 0 0/58px 46px,radial-gradient(circle,#ffe9b0 0 1.2px,transparent 2px) 27px 21px/71px 53px;
+  -webkit-mask:linear-gradient(#000,transparent 160px);mask:linear-gradient(#000,transparent 160px)}
+.t1 .intro>*{position:relative}
+.t1 h1{font-weight:700}
+.t1 .dates{border-color:#4a5675}.t1 .dates>div{border-color:#4a5675}
+.t1 .dates .is-low .s{background:#b9cfe4;color:#1d2742}.t1 .dates .is-ok .s{color:#e6ecf5}.t1 .dates .is-out .s{background:#3b4766;color:#c3c9d8}
+.t1 .place a{color:#f3ecdc}
+.t1 .notice{border-bottom:1px solid var(--line)}
+.t1 .notice::before{content:"";display:block;height:10px;margin:-30px -20px 26px;background:repeating-linear-gradient(90deg,#b9cfe4 0 26px,transparent 26px 34px)}
+.t1 .divider{color:#1d2742}.t1 .divider::before,.t1 .divider::after{background:#b9cfe4;height:2px}
+.t1 .cal-g .is-sel .c{background:#1d2742;color:#f3ecdc}.t1 .cal-g .is-low .t{color:#2f5d8a}.t1 .cal-g .is-out .c{background:#dce7f2;color:#56607a}
+.t1 .lg-sel{background:#1d2742}.t1 .lg-out{background:#dce7f2}
+.t1 .tm.is-sel{background:#1d2742;color:#f3ecdc}
+@media (min-width:1080px){.t1 .hero{padding:0}.t1 .hero img{border:0}.t1 .rb{width:80px;height:380px}.t1 .notice::before{margin:-40px -52px 30px}}
+</style>
+</head>
+<body class="t1">
+
+<header class="top"><span class="logo"><b>Nez</b><small>coffee · parfait · cake</small></span><a href="#">주문 조회</a></header>
+<div class="page">
+  <div class="hero">
+    <picture>
+      <source media="(min-width: 1080px)" srcset="../assets/hero-tall.webp">
+      <img src="../assets/hero-single.webp" width="1200" height="1000" alt="크리스마스 트리 앞 나무 테이블에 놓인 딸기 생크림 홀케이크">
+    </picture>
+    <svg class="rb rb-l" viewBox="0 0 90 420" aria-hidden="true">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M45 30 C20 6 4 18 10 32 C16 46 38 40 45 30 C52 40 74 46 80 32 C86 18 70 6 45 30Z" stroke="#b9cfe4" stroke-width="6"/>
+    <path d="M42 34 C34 90 58 130 40 190 C24 245 56 290 38 350 C30 380 40 400 46 414" stroke="#b9cfe4" stroke-width="7"/>
+    <path d="M50 34 C64 80 44 120 60 170 C74 215 52 250 66 300" stroke="#9db8d6" stroke-width="6"/>
+    <path d="M42 34 C34 90 58 130 40 190 C24 245 56 290 38 350" stroke="#e6eff7" stroke-width="1.5" opacity=".8"/>
+  </g><circle cx="45" cy="31" r="6" fill="#d4e3f1"/></svg><svg class="rb rb-r" viewBox="0 0 90 420" aria-hidden="true" style="transform:scaleX(-1)">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M45 30 C20 6 4 18 10 32 C16 46 38 40 45 30 C52 40 74 46 80 32 C86 18 70 6 45 30Z" stroke="#b9cfe4" stroke-width="6"/>
+    <path d="M42 34 C34 90 58 130 40 190 C24 245 56 290 38 350 C30 380 40 400 46 414" stroke="#b9cfe4" stroke-width="7"/>
+    <path d="M50 34 C64 80 44 120 60 170 C74 215 52 250 66 300" stroke="#9db8d6" stroke-width="6"/>
+    <path d="M42 34 C34 90 58 130 40 190 C24 245 56 290 38 350" stroke="#e6eff7" stroke-width="1.5" opacity=".8"/>
+  </g><circle cx="45" cy="31" r="6" fill="#d4e3f1"/></svg>
+  </div>
+  <div class="body">
+    <section class="sec intro">
+      <i class="lights" aria-hidden="true"></i>
+      <p class="kicker">A slow, warm moment</p>
+      <h1>Nez의 크리스마스<br>홀케이크를 예약받아요</h1>
+      <p class="lead">예약은 선착순으로 확정되며,준비된 수량이 모두 예약되면 마감됩니다.</p>
+      <div class="cake"><div><b>크리스마스 딸기 홀케이크</b><span class="desc">구성-마스카포네 우유 생크림,발로나 초코 제누와즈,생딸기,메리 크리스마스 레터링 버터 쿠키</span></div><span class="price num">60,000원</span></div>
+      <figure class="cut"><img src="../assets/cake-cut.webp" width="1200" height="800" loading="lazy" alt="케이크 단면: 초코 제누와즈 사이 생크림과 생딸기"><figcaption>자른 모습 · 초코 제누와즈와 생딸기</figcaption></figure>
+      <div class="dates">
+        <div class="is-low"><div class="n num">23</div><div class="w">수요일</div><span class="s">3개 남음</span></div>
+        <div class="is-ok"><div class="n num">24</div><div class="w">목요일</div><span class="s">예약 가능</span></div>
+        <div class="is-out"><div class="n num">25</div><div class="w">금요일</div><span class="s">마감</span></div>
+      </div>
+      <dl class="facts"><div><dt>픽업 시간</dt><dd class="num">12:00 ~ 20:00</dd></div><div><dt>입금 기한</dt><dd>주문 후 <span class="num">24</span>시간 안에 계좌이체</dd></div><div><dt>주문 마감</dt><dd>12월 21일 (월) 오후 11:59</dd></div></dl>
+      <p class="place"><span>픽업 장소</span><a href="#">지도 보기</a><b><span class="nw">마포구 성미산로 29-1</span> <span class="nw">1층 카페 네즈</span></b></p>
+    </section>
+    <section class="sec notice">
+      
+      <h2>픽업 안내</h2>
+      <ul class="notices"><li>📍픽업 가능한 시간대 12:00pm~20:00pm</li><li>📍케이크 픽업 후 수평 수직을 맞추어 들어주세요
+생크림 케이크는 이틀 안으로 드시는 걸 권장합니다 꼭 냉장 보관 하시고 차가운 상태에서 드셔주세요😊</li><li>📍주문 제작 케이크는 이틀 전 부터 밑작업 준비 및 재료 준비를 해두기 때문에 노쇼 방지를 위해 계좌이체로 선결제받고 있어요
+2일 전 주문 취소 시 100%환불해드리고 있어요
+픽업 하루 전 취소 시 케이크 작업이 시작되기 때문에 전액 환불 안 되는 점 너른 양해 부탁드리겠습니다😊</li><li>📍케이크 나이프,성냥,실버 롱스틱 초1개 기본 구성입니다</li></ul>
+    </section>
+    <section class="sec form">
+      
+      <p class="divider">예약하기</p>
+      <div class="lbl"><b>픽업 날짜</b><span>23 · 24 · 25일 중에서</span></div>
+      <div class="cal"><p class="cal-h"><b class="num">12</b>월</p><div class="cal-g"><div class="wd">일</div><div class="wd">월</div><div class="wd">화</div><div class="wd">수</div><div class="wd">목</div><div class="wd">금</div><div class="wd">토</div><div class="d"></div><div class="d"></div><div class="d"><span class="c">1</span></div><div class="d"><span class="c">2</span></div><div class="d"><span class="c">3</span></div><div class="d"><span class="c">4</span></div><div class="d"><span class="c">5</span></div><div class="d"><span class="c">6</span></div><div class="d"><span class="c">7</span></div><div class="d"><span class="c">8</span></div><div class="d"><span class="c">9</span></div><div class="d"><span class="c">10</span></div><div class="d"><span class="c">11</span></div><div class="d"><span class="c">12</span></div><div class="d"><span class="c">13</span></div><div class="d"><span class="c">14</span></div><div class="d"><span class="c">15</span></div><div class="d"><span class="c">16</span></div><div class="d"><span class="c">17</span></div><div class="d"><span class="c">18</span></div><div class="d"><span class="c">19</span></div><div class="d"><span class="c">20</span></div><div class="d"><span class="c">21</span></div><div class="d"><span class="c">22</span></div><div class="d on is-low"><span class="c">23</span><span class="t">3개 남음</span></div><div class="d on is-sel"><span class="c">24</span><span class="t">선택함</span></div><div class="d on is-out"><span class="c">25</span><span class="t">마감</span></div><div class="d"><span class="c">26</span></div><div class="d"><span class="c">27</span></div><div class="d"><span class="c">28</span></div><div class="d"><span class="c">29</span></div><div class="d"><span class="c">30</span></div><div class="d"><span class="c">31</span></div><div class="d"></div><div class="d"></div></div>
+  <p class="cal-legend"><span><i class="lg-sel"></i>선택</span><span><i class="lg-out"></i>마감</span></p></div>
+      <div class="lbl"><b>픽업 시간</b><span>12월 24일 (목)</span></div>
+      <div class="times"><p class="ap">낮</p><span class="tm">12:00</span><span class="tm">12:30</span><span class="tm">13:00</span><span class="tm">13:30</span><span class="tm">14:00</span><span class="tm is-sel">14:30</span><span class="tm">15:00</span><span class="tm">15:30</span><span class="tm">16:00</span><span class="tm">16:30</span><p class="ap">저녁</p><span class="tm">17:00</span><span class="tm">17:30</span><span class="tm">18:00</span><span class="tm">18:30</span><span class="tm">19:00</span><span class="tm">19:30</span><span class="tm">20:00</span></div>
+      <div class="lbl"><b>주문하시는 분</b></div>
+      <div class="field"><label>성함</label><span class="in">김민지</span></div>
+      <div class="field"><label>연락처</label><span class="in num">010-1234-5678</span></div>
+      <div class="field"><label>케이크 개수</label><div class="qty"><span>−</span><span class="num">1</span><span>+</span></div></div>
+      <div class="agree"><i></i><div>개인정보 수집·이용에 <span class="nw">동의합니다 (필수)</span><small>수집 항목: 이름, 연락처
+목적: 예약 확인과 픽업 안내
+보관: 픽업 종료 후 환불 문의 기간까지</small></div></div>
+    </section>
+    <div class="foot-space"></div>
+    <div class="bar"><div class="tot"><span>12/24 (목) 14:30 · 1개</span><b class="num">60,000원</b></div><span class="btn">주문하기</span></div>
+  </div>
+</div>
+</body>
+</html>

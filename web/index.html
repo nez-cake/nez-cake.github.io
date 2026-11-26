@@ -29,7 +29,7 @@
     - 네 파일 모두 같은 값을 쓴다. 하나만 고쳐도 네 개를 함께 올린다(헷갈리지 않게).
     - index.html 자체에는 꼬리표를 붙일 수 없다. GitHub Pages는 파일을 10분쯤 캐시하므로, 배포 직후 10분 안에는 예전 화면이 보일 수 있다(그래도 짝이 맞는 파일끼리 열려 깨지지 않는다).
   -->
-  <link rel="stylesheet" href="styles.css?v=20261126b">
+  <link rel="stylesheet" href="styles.css?v=20261126e">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -66,10 +66,10 @@
     <section class="screen" data-screen="home" hidden aria-labelledby="introTitle">
       <div class="home">
         <!-- 사진·제목·설명은 API를 기다리지 않고 바로 보인다. 가격·날짜·수량 자리만 뼈대로 있다가 채워진다. -->
-        <!-- 대표 사진: 폰·태블릿은 가로 사진(13), PC(1080px~) 왼쪽 고정 칸은 세로 사진(12) -->
+        <!-- 대표 사진: 1단 배치는 hero-single(12번을 6:5로 잘라 케이크 전체가 들어감), PC 2단(1080px~ 그리고 가로/세로 9/8 이상, styles.css와 같은 조건) 왼쪽 고정 칸은 세로 사진(12) -->
         <picture class="home-photo" id="heroPhoto">
-          <source media="(min-width: 1080px)" srcset="assets/hero-tall.webp" width="1200" height="1600">
-          <img src="assets/hero-wide.webp" width="1200" height="900" fetchpriority="high" decoding="async"
+          <source media="(min-width: 1080px) and (min-aspect-ratio: 9/8)" srcset="assets/hero-tall.webp" width="1200" height="1600">
+          <img src="assets/hero-single.webp" width="1200" height="1000" fetchpriority="high" decoding="async"
             alt="크리스마스 트리 앞 나무 테이블에 놓인 딸기 생크림 홀케이크. 메리 크리스마스 쿠키와 촛불이 꽂혀 있어요.">
         </picture>
 
@@ -93,7 +93,7 @@
               <div aria-hidden="true"><span class="sk sk-num"></span><span class="sk sk-w50 sk-sm"></span></div>
               <div aria-hidden="true"><span class="sk sk-num"></span><span class="sk sk-w50 sk-sm"></span></div>
             </div>
-            <p class="note" id="introNote"><span class="sk sk-w80 sk-sm" aria-hidden="true"></span></p>
+            <dl class="facts" id="introNote"><div aria-hidden="true"><span class="sk sk-w80 sk-sm"></span></div></dl>
             <p class="place" id="introPlace" hidden></p>
             <p class="load-msg" id="introLoadMsg" role="status">예약 현황을 불러오고 있어요…</p>
           </div>
@@ -107,7 +107,7 @@
           <ol class="steps" aria-label="예약 순서">
             <li><i>1</i><span>날짜와 시간을 고르고 연락처를 남겨 주세요.</span></li>
             <li><i>2</i><span>안내되는 계좌로 입금 마감 전까지 이체해 주세요.</span></li>
-            <li><i>3</i><span>입금이 확인되면 주문 조회 화면이 "예약 확정"으로 바뀌어요.</span></li>
+            <li><i>3</i><span>입금이 확인되면 주문 조회 화면이 <span class="nw">"예약 확정"으로</span> 바뀌어요.</span></li>
           </ol>
 
           <!-- 접수 전·마감 후에는 주문서 대신 이 안내만 보인다 -->
@@ -183,7 +183,7 @@
             <label class="agree">
               <input type="checkbox" id="agreePrivacy" name="agreePrivacy" aria-describedby="privacyText err-agreePrivacy">
               <span class="box" aria-hidden="true"></span>
-              <span>개인정보 수집·이용에 동의합니다 <em>(필수)</em>
+              <span>개인정보 수집·이용에 <span class="nw">동의합니다 <em>(필수)</em></span>
                 <small id="privacyText"></small>
               </span>
             </label>
@@ -264,8 +264,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js?v=20261126b"></script>
-  <script src="mock/mock-api.js?v=20261126b"></script>
-  <script src="app.js?v=20261126b"></script>
+  <script src="config.js?v=20261126e"></script>
+  <script src="mock/mock-api.js?v=20261126e"></script>
+  <script src="app.js?v=20261126e"></script>
 </body>
 </html>

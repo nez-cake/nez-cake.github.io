@@ -55,6 +55,9 @@ img { display: block; max-width: 100%; }
 main:focus { outline: none; }
 
 :focus-visible { outline: 2px solid var(--choco); outline-offset: 2px; }
+/* 마우스·터치로 누르거나 프로그램이 옮긴 포커스에는 테두리를 그리지 않는다 (키보드 이동 때만 :focus-visible) */
+:focus:not(:focus-visible) { outline: none; }
+html { -webkit-tap-highlight-color: transparent; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .footer-biz[hidden] + .footer-policy { margin-top: 0; padding-top: 0; border-top: 0; }
@@ -100,7 +103,8 @@ main:focus { outline: none; }
   display: grid; place-items: center; border: 0; background: transparent; cursor: pointer;
 }
 .back svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.logo { flex: 1; min-width: 0; text-decoration: none; line-height: 1; }
+.logo { flex: none; margin-right: auto; min-width: 0; text-decoration: none; line-height: 1; } /* 글자 크기만큼만 차지 (포커스 테두리가 줄 전체에 그려지지 않게) */
+.logo:focus-visible { outline-offset: 4px; }
 .logo-name { display: block; font-family: var(--latin); font-weight: 600; font-size: 30px; letter-spacing: -.01em; }
 .logo-sub { display: block; margin-top: 5px; font-family: var(--latin); font-size: 10px; letter-spacing: .14em; color: var(--ink-2); white-space: nowrap; }
 .top-link {
@@ -133,6 +137,9 @@ main:focus { outline: none; }
 
 /* ---------- 소개 ---------- */
 .lead { margin: 0 0 28px; color: var(--ink-2); white-space: pre-line; }
+/* 한글 문단: 낱말 중간에서 끊지 않고(keep-all), 마지막 줄에 한두 글자만 남지 않게(pretty) */
+p, li, dd, dt, figcaption, small, .h-xl, .h-lg { word-break: keep-all; text-wrap: pretty; }
+h1, h2, .h-xl, .h-lg { text-wrap: balance; }
 
 .cakes { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 .cakes li { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
@@ -153,10 +160,18 @@ main:focus { outline: none; }
 .datebox .is-out .s { padding: 0 9px; border-radius: 999px; background: var(--pink); color: var(--pink-ink); }
 .note { margin: 6px 0 26px; font-size: 14px; color: var(--ink-2); }
 .note span { white-space: nowrap; }
+/* 날짜 칸 아래 안내: 항목별 줄 */
+.facts { margin: 8px 0 22px; font-size: 14px; line-height: 1.5; }
+.facts > div { display: flex; gap: 14px; padding: 4px 0; }
+.facts dt { flex: none; width: 5em; color: var(--ink-2); }
+.facts dd { margin: 0; min-width: 0; color: var(--ink); }
 .datebox .is-closed .s { color: var(--ink-2); }
-.place { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 24px; padding: 12px 0; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); font-size: 14px; color: var(--ink-2); }
-.place b { color: var(--ink); font-weight: 400; }
-.place a { flex: none; display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }
+/* 픽업 장소: 이름(작게)과 지도 보기가 윗줄, 주소는 자기 줄 */
+.place { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px; margin: 0 0 24px; padding: 8px 0 12px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); font-size: 14px; color: var(--ink-2); }
+.place .place-k { grid-column: 1; grid-row: 1; }
+.place a { grid-column: 2; grid-row: 1; justify-self: end; display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }
+.place .place-v { grid-column: 1 / -1; grid-row: 2; color: var(--ink); font-weight: 400; font-size: 15px; line-height: 1.55; text-wrap: balance; }
+.nw { white-space: nowrap; }
 .place-box { margin-top: 14px; padding: 4px 18px; border: 1px solid var(--line); background: var(--paper); }
 .place-box .place { margin: 0; border: 0; }
 .closed { margin: 0 0 14px; padding: 14px 16px; border: 1px solid var(--pink-ink); color: var(--pink-ink); background: var(--paper); text-align: center; }
@@ -207,7 +222,7 @@ main:focus { outline: none; }
 }
 .cal-g .d:nth-child(7n) { border-right: 0; }
 .cal-g .d .c { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; line-height: 1; }
-.cal-g .d .t { display: block; font-family: var(--kr); font-size: 11px; line-height: 1.25; color: var(--ink-2); white-space: nowrap; }
+.cal-g .d .t { display: block; font-family: var(--kr); font-size: 11px; line-height: 1.25; color: var(--ink-2); white-space: normal; padding: 0 1px; } /* 좁은 폰에서는 "3개 / 남음" 두 줄로 (칸 밖으로 넘치지 않게) */
 .cal-g label.d { color: var(--ink); cursor: pointer; }
 .cal-g label.d input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .cal-g label.d input:focus-visible + .c { outline: 2px solid var(--choco); outline-offset: 2px; }
@@ -283,7 +298,7 @@ main:focus { outline: none; }
 .agree input:checked + .box::after { transform: rotate(45deg) scale(1); }
 .agree input:focus-visible + .box { outline: 2px solid var(--choco); outline-offset: 3px; }
 .agree em { font-style: normal; color: var(--berry); }
-.agree small { display: block; margin-top: 6px; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.agree small { display: block; margin-top: 6px; font-size: 13px; line-height: 1.55; color: var(--ink-2); white-space: pre-line; }
 
 .form-error { margin: 24px 0 0; padding: 14px 16px; border: 1px solid var(--berry); background: var(--paper); color: var(--berry); font-size: 15px; }
 .form-error.is-info { border-color: var(--line); color: var(--ink-2); }
@@ -341,7 +356,7 @@ main:focus { outline: none; }
 .deadline .left { color: var(--berry); white-space: nowrap; }
 .deadline .v { margin-top: 2px; font-size: 17px; font-weight: 700; }
 
-.live { margin: 20px 0 0; font-size: 13px; color: var(--ink-2); text-align: center; }
+.live { margin: 20px 0 0; font-size: 13px; color: var(--ink-2); text-align: center; white-space: pre-line; }
 
 .osum { margin-top: 28px; }
 .osum h2 { margin: 0 0 8px; font-size: 14px; font-weight: 400; color: var(--ink-2); }
@@ -440,10 +455,16 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
 /* =========================================================
    한 화면형: 사진 → 소개 → 케이크·날짜 → 주문서
    ========================================================= */
-/* 폰·태블릿: 13번 가로 사진을 자르지 않고 원본 비율(4:3) 그대로 전체를 보여 준다.
-   높이를 화면 높이(vh)에 묶지 않으므로 낮은 폰이나 인앱 브라우저 바가 있어도 불꽃·쿠키 글씨가 잘리지 않는다. */
-.home-photo { display: block; width: 100%; overflow: hidden; background: #e9dfcf; }
-.home-photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+/* 1단 배치(PC 2단이 아닐 때 전부): hero-single(12번 사진을 6:5로 자른 것, 불꽃 끝부터 흰 받침까지 다 들어 있음)를
+   자르지 않고 전체를 보여 준다.
+   - 최대 너비 720px, 가운데 정렬
+   - 화면이 낮으면(가로로 눕힌 폰 등) 로고 줄(69px)과 아래 주문 바 사이에 사진 전체가 들어가게 너비를 줄인다 */
+.home-photo {
+  display: block; width: 100%; margin: 0 auto; overflow: hidden; background: #e9dfcf;
+  max-width: min(720px, calc((100vh - 72px - var(--bar-h) - var(--safe-bottom)) * 6 / 5));
+  max-width: min(720px, calc((100svh - 72px - var(--bar-h) - var(--safe-bottom)) * 6 / 5));
+}
+.home-photo img { display: block; width: 100%; height: auto; aspect-ratio: 6 / 5; object-fit: cover; object-position: 50% 100%; }
 
 /* 단면 사진 (케이크 이름·구성 바로 아래) */
 .cake-cut { margin: 16px 0 0; }
@@ -466,7 +487,6 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
 @media (min-width: 768px) {
   :root { --gutter: 40px; }
   .logo-name { font-size: 34px; }
-  .home-photo { max-width: 760px; margin: 0 auto; } /* 큰 태블릿에서 사진이 화면을 다 덮지 않게 */
   .home-body { max-width: 720px; margin: 0 auto; padding: 44px var(--gutter) 48px; }
   .h-xl { font-size: 36px; }
   .times { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -479,13 +499,30 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
    데스크톱 (1080px~): 왼쪽 사진 고정 + 오른쪽 스크롤, 주문 바는 오른쪽 아래에 붙는다
    ========================================================= */
 @media (min-width: 1080px) {
-  .home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 600px); }
-  /* PC: 12번 세로 사진을 왼쪽 칸에 꽉 채운다(위아래가 조금 잘림).
-     불꽃 끝은 사진 높이의 약 24%, 케이크 아래 끝은 약 80% 지점 → 기준점 55%면 1280x720~1920x1080에서 둘 다 보인다. */
-  .home-photo { position: sticky; top: 69px; max-width: none; margin: 0; height: calc(100vh - 69px); }
-  .home-photo img { height: 100%; aspect-ratio: auto; object-position: 50% 55%; }
-  .home-body { max-width: none; margin: 0; padding: 48px 56px 0; }
   .h-xl { font-size: 38px; }
+  .order-wrap { max-width: 1120px; padding: 48px var(--gutter) 72px; }
+  .order-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; column-gap: 64px; align-items: start; }
+  .order-side { position: sticky; top: 100px; margin-top: 24px; }
+  .order-side .osum { margin-top: 0; padding: 18px 24px 6px; border: 1px solid var(--line); background: var(--paper); }
+  .order-side .osum dl { border-top: 0; }
+  .narrow { max-width: 560px; margin: 0 auto; }
+  .lookup-wrap { padding-top: 64px; }
+}
+
+/* =========================================================
+   PC 2단 (1080px 이상이고 화면이 세로보다 충분히 넓을 때)
+   왼쪽: 12번 세로 사진을 칸에 꽉 채워 고정. 케이크(불꽃 끝 ~23% ~ 흰 받침 아래 ~84%,
+   좌우 받침 14%~82%)가 잘리지 않도록
+   - 사진 칸 너비를 남은 화면 높이의 1.15배 이하로 묶는다(넓으면 위아래가 너무 많이 잘림)
+   - 화면이 세로로 길면(가로/세로 < 9/8) 2단을 쓰지 않는다(좌우가 너무 많이 잘림)
+   - 잘릴 때는 위(트리)를 더 자르고 아래(케이크)를 남긴다: 기준점 60%
+   이 조건은 index.html <picture>의 source media와 같아야 한다.
+   ========================================================= */
+@media (min-width: 1080px) and (min-aspect-ratio: 9/8) {
+  .home { display: grid; grid-template-columns: minmax(0, calc((100vh - 69px) * 1.15)) minmax(600px, 1fr); }
+  .home-photo { position: sticky; top: 69px; max-width: none; margin: 0; height: calc(100vh - 69px); }
+  .home-photo img { height: 100%; aspect-ratio: auto; object-position: 50% 60%; }
+  .home-body { max-width: 760px; margin: 0; padding: 48px 56px 0; }
   .summary {
     position: sticky; bottom: 0; left: auto; right: auto;
     margin: 40px -56px 0; padding: 16px 56px calc(16px + var(--safe-bottom));
@@ -500,17 +537,13 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
   .order-form { padding-bottom: 0; }
   body.has-bar .footer-in { padding-bottom: calc(36px + var(--safe-bottom)); }
   .toast { bottom: 100px; }
-
-  .order-wrap { max-width: 1120px; padding: 48px var(--gutter) 72px; }
-  .order-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; column-gap: 64px; align-items: start; }
-  .order-side { position: sticky; top: 100px; margin-top: 24px; }
-  .order-side .osum { margin-top: 0; padding: 18px 24px 6px; border: 1px solid var(--line); background: var(--paper); }
-  .order-side .osum dl { border-top: 0; }
-  .narrow { max-width: 560px; margin: 0 auto; }
-  .lookup-wrap { padding-top: 64px; }
 }
 
-/* 아주 넓은 화면(1600px~): 오른쪽 칸을 720px로 넓혀 왼쪽 세로 사진이 덜 잘리게 */
-@media (min-width: 1600px) {
-  .home { grid-template-columns: minmax(0, 1fr) minmax(0, 720px); }
+/* 화면 높이가 낮을 때(가로로 눕힌 폰, 520px 이하): 아래 고정 바를 얇게 */
+@media (max-height: 520px) {
+  :root { --bar-h: 60px; }
+  .summary { gap: 12px; padding-top: 7px; padding-bottom: calc(7px + var(--safe-bottom)); }
+  .sum-total span { font-size: 11px; }
+  .sum-total strong { font-size: 20px; }
+  .summary .btn { min-height: 44px; padding-top: 0; padding-bottom: 0; }
 }

@@ -240,7 +240,7 @@
     if (BRAND.logoSub) $("#logoSub").textContent = BRAND.logoSub;
     if (BRAND.motto) $("#introKicker").textContent = BRAND.motto;
     if (String(cafe.tagline || "").trim()) $("#introLead").textContent = String(cafe.tagline).trim(); // 소개 문단
-    // 대표 사진은 index.html의 <picture>(assets/hero-wide·hero-tall). 시트에 heroImageUrl이 있으면 그 사진 하나로 바꾼다.
+    // 대표 사진은 index.html의 <picture>(assets/hero-single·hero-tall). 시트에 heroImageUrl이 있으면 그 사진 하나로 바꾼다.
     var heroUrl = String(cafe.heroImageUrl || "").trim();
     if (heroUrl) {
       var hero = $("#heroPhoto");
@@ -269,11 +269,13 @@
         '<span class="s" aria-hidden="true">' + esc(s) + "</span></div>";
     }).join("");
 
-    var note = [];
-    if (times.length) note.push("픽업 " + times[0] + " ~ " + times[times.length - 1]);
-    if (c.order && c.order.depositDeadlineHours) note.push("주문 후 " + c.order.depositDeadlineHours + "시간 안에 계좌이체");
-    if (c.order && c.order.closeAt) note.push("주문 마감 " + fmtDateTime(c.order.closeAt));
-    $("#introNote").innerHTML = note.map(function (n) { return "<span>" + esc(n) + "</span>"; }).join('<span aria-hidden="true"> · </span>');
+    // 한 줄에 점으로 잇지 않고 항목별 줄로 (왼쪽 작은 이름, 오른쪽 값)
+    var facts = [];
+    if (times.length) facts.push(["픽업 시간", times[0] + " ~ " + times[times.length - 1]]);
+    if (c.order && c.order.depositDeadlineHours) facts.push(["입금 기한", "주문 후 " + c.order.depositDeadlineHours + "시간 안에 계좌이체"]);
+    if (c.order && c.order.closeAt) facts.push(["주문 마감", fmtDateTime(c.order.closeAt)]);
+    $("#introNote").innerHTML = facts.map(function (f) { return "<div><dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd></div>"; }).join("");
+    $("#introNote").hidden = !facts.length;
     renderPlace($("#introPlace"));
 
     // 접수 전·마감 후: 주문서와 하단 바를 숨기고 안내만 보인다
@@ -373,7 +375,7 @@
     $("#letteringMax").textContent = lt.maxLength || 20;
 
     var pv = (c.policies || {}).privacy || "";
-    $("#privacyText").textContent = pv.split("/").map(function (s) { return s.trim(); }).filter(Boolean).join(" / ");
+    $("#privacyText").textContent = pv.split("/").map(function (s) { return s.trim(); }).filter(Boolean).join("\n"); // 항목별 줄 (CSS pre-line)
 
     // 선택값이 아직 유효하면 유지
     if (state.sel.productId && !productById(state.sel.productId)) state.sel.productId = null;
@@ -746,7 +748,12 @@
   function placeHtml() {
     var a = state.catalog && state.catalog.business ? String(state.catalog.business.address || "").trim() : "";
     if (!a) return "";
-    return '<span>픽업 장소 <b>' + esc(a) + "</b></span>" +
+    // 주소는 자기 줄에. "도로명 번지"와 나머지(층·상호)를 각각 붙여 두어 마지막 한 단어만 떨어지지 않게 한다.
+    var road = mapQuery(a), rest = a.slice(road.length).trim();
+    var addr = rest && a.indexOf(road) === 0
+      ? '<span class="nw">' + esc(road) + '</span> <span class="nw">' + esc(rest) + "</span>"
+      : esc(a);
+    return '<span class="place-k">픽업 장소</span><b class="place-v">' + addr + "</b>" +
       '<a href="https://map.naver.com/p/search/' + encodeURIComponent(mapQuery(a)) + '" target="_blank" rel="noopener">지도 보기<span class="sr-only"> (새 창)</span></a>';
   }
   function noticeList() {
@@ -798,7 +805,7 @@
     return b && b.phone ? b.phone : "";
   }
   function liveText() {
-    return "입금이 확인되면 이 화면이 \"예약 확정\"으로 바뀌어요 · 5초마다 자동 확인";
+    return "입금이 확인되면 이 화면이 \"예약 확정\"으로 바뀌어요\n5초마다 자동으로 확인해요"; // 두 줄 (CSS pre-line)
   }
 
   function renderOrder(d, saved) {
