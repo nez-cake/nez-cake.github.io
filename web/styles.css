@@ -440,12 +440,10 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
 /* =========================================================
    한 화면형: 사진 → 소개 → 케이크·날짜 → 주문서
    ========================================================= */
-.home-photo {
-  display: block; width: 100%; height: 40vh; min-height: 220px; max-height: 380px;
-  overflow: hidden; background: #e9dfcf;
-}
-/* 13번 사진: 촛불(위)과 쿠키 글씨(가운데)가 잘리지 않게 세로 기준점을 조금 위로 */
-.home-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+/* 폰·태블릿: 13번 가로 사진을 자르지 않고 원본 비율(4:3) 그대로 전체를 보여 준다.
+   높이를 화면 높이(vh)에 묶지 않으므로 낮은 폰이나 인앱 브라우저 바가 있어도 불꽃·쿠키 글씨가 잘리지 않는다. */
+.home-photo { display: block; width: 100%; overflow: hidden; background: #e9dfcf; }
+.home-photo img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
 
 /* 단면 사진 (케이크 이름·구성 바로 아래) */
 .cake-cut { margin: 16px 0 0; }
@@ -468,7 +466,7 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
 @media (min-width: 768px) {
   :root { --gutter: 40px; }
   .logo-name { font-size: 34px; }
-  .home-photo { height: 42vh; max-height: 440px; }
+  .home-photo { max-width: 760px; margin: 0 auto; } /* 큰 태블릿에서 사진이 화면을 다 덮지 않게 */
   .home-body { max-width: 720px; margin: 0 auto; padding: 44px var(--gutter) 48px; }
   .h-xl { font-size: 36px; }
   .times { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -482,8 +480,10 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
    ========================================================= */
 @media (min-width: 1080px) {
   .home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 600px); }
-  .home-photo { position: sticky; top: 69px; height: calc(100vh - 69px); max-height: none; min-height: 0; }
-  .home-photo img { object-position: 50% 55%; } /* 12번 세로 사진: 촛불부터 케이크 받침까지 */
+  /* PC: 12번 세로 사진을 왼쪽 칸에 꽉 채운다(위아래가 조금 잘림).
+     불꽃 끝은 사진 높이의 약 24%, 케이크 아래 끝은 약 80% 지점 → 기준점 55%면 1280x720~1920x1080에서 둘 다 보인다. */
+  .home-photo { position: sticky; top: 69px; max-width: none; margin: 0; height: calc(100vh - 69px); }
+  .home-photo img { height: 100%; aspect-ratio: auto; object-position: 50% 55%; }
   .home-body { max-width: none; margin: 0; padding: 48px 56px 0; }
   .h-xl { font-size: 38px; }
   .summary {
@@ -508,4 +508,9 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
   .order-side .osum dl { border-top: 0; }
   .narrow { max-width: 560px; margin: 0 auto; }
   .lookup-wrap { padding-top: 64px; }
+}
+
+/* 아주 넓은 화면(1600px~): 오른쪽 칸을 720px로 넓혀 왼쪽 세로 사진이 덜 잘리게 */
+@media (min-width: 1600px) {
+  .home { grid-template-columns: minmax(0, 1fr) minmax(0, 720px); }
 }
