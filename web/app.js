@@ -8,7 +8,7 @@
 
   var CFG = window.APP_CONFIG || {};
   var BRAND = CFG.BRAND || {};
-  var IMAGES = CFG.IMAGES || {};
+  // config.js의 IMAGES(예전 사진 경로)는 더 쓰지 않는다. 사진은 index.html이 assets/의 올해 사진을 직접 부른다.
   var POLL_MS = 5000;
   var TIMEOUT_MS = 20000;
   var KEY_ORDERS = "xmasCake.orders";   // localStorage: { [orderId]: { phone4, depositorName, savedAt, last } }
@@ -228,7 +228,6 @@
   }
   function isOpen() { var o = state.catalog.order; return !o || o.isOpen !== false; }
   function singleProduct() { return state.catalog.products.length === 1; }
-  function bgImage(el, url) { el.style.backgroundImage = url ? "url(\"" + String(url).replace(/"/g, "%22") + "\")" : ""; }
 
   function renderCatalog() {
     var c = state.catalog;
@@ -241,10 +240,13 @@
     if (BRAND.logoSub) $("#logoSub").textContent = BRAND.logoSub;
     if (BRAND.motto) $("#introKicker").textContent = BRAND.motto;
     if (String(cafe.tagline || "").trim()) $("#introLead").textContent = String(cafe.tagline).trim(); // 소개 문단
-    var hero = $("#heroPhoto");
-    var heroUrl = cafe.heroImageUrl || IMAGES.hero || "";
-    if (heroUrl && heroUrl !== IMAGES.hero) bgImage(hero, heroUrl);
-    hero.setAttribute("aria-label", (c.products[0] && c.products[0].name ? c.products[0].name : "케이크") + " 사진");
+    // 대표 사진은 index.html의 <picture>(assets/hero-wide·hero-tall). 시트에 heroImageUrl이 있으면 그 사진 하나로 바꾼다.
+    var heroUrl = String(cafe.heroImageUrl || "").trim();
+    if (heroUrl) {
+      var hero = $("#heroPhoto");
+      $all("source", hero).forEach(function (s) { s.remove(); });
+      $("img", hero).src = heroUrl;
+    }
     var open = isOpen();
     var before = !open && c.order && c.order.openAt && Date.now() < Date.parse(c.order.openAt);
     var openLabel = before ? fmtMonthDay(c.order.openAt) + " 오픈" : "접수 마감";

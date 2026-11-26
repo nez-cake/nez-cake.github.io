@@ -6,7 +6,19 @@
   <meta name="theme-color" content="#f8f4ec">
   <meta name="format-detection" content="telephone=no">
   <title>크리스마스 홀케이크 예약</title>
-  <meta name="description" content="크리스마스 홀케이크 예약 · 12월 23·24·25일 픽업">
+  <meta name="description" content="Nez 크리스마스 딸기 홀케이크 예약 · 12월 23·24·25일 픽업 · 선착순">
+  <!-- 링크 미리보기 (카카오톡·인스타 등). og:image는 절대 주소여야 해서 배포 주소를 적는다. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Nez">
+  <meta property="og:title" content="Nez 크리스마스 홀케이크 예약">
+  <meta property="og:description" content="12월 23·24·25일 픽업 · 마스카포네 생크림, 초코 제누와즈, 생딸기 · 선착순 예약">
+  <meta property="og:url" content="https://nez-cake.github.io/">
+  <meta property="og:image" content="https://nez-cake.github.io/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="트리 앞 딸기 생크림 홀케이크와 메리 크리스마스 쿠키">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
@@ -17,7 +29,7 @@
     - 네 파일 모두 같은 값을 쓴다. 하나만 고쳐도 네 개를 함께 올린다(헷갈리지 않게).
     - index.html 자체에는 꼬리표를 붙일 수 없다. GitHub Pages는 파일을 10분쯤 캐시하므로, 배포 직후 10분 안에는 예전 화면이 보일 수 있다(그래도 짝이 맞는 파일끼리 열려 깨지지 않는다).
   -->
-  <link rel="stylesheet" href="styles.css?v=20261124a">
+  <link rel="stylesheet" href="styles.css?v=20261126a">
 </head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -54,7 +66,12 @@
     <section class="screen" data-screen="home" hidden aria-labelledby="introTitle">
       <div class="home">
         <!-- 사진·제목·설명은 API를 기다리지 않고 바로 보인다. 가격·날짜·수량 자리만 뼈대로 있다가 채워진다. -->
-        <div class="home-photo" id="heroPhoto" role="img" aria-label="크리스마스 딸기 홀케이크 사진" style="background-image:url('assets/hero.webp')"></div>
+        <!-- 대표 사진: 폰·태블릿은 가로 사진(13), PC(1080px~) 왼쪽 고정 칸은 세로 사진(12) -->
+        <picture class="home-photo" id="heroPhoto">
+          <source media="(min-width: 1080px)" srcset="assets/hero-tall.webp" width="1200" height="1600">
+          <img src="assets/hero-wide.webp" width="1200" height="900" fetchpriority="high" decoding="async"
+            alt="크리스마스 트리 앞 나무 테이블에 놓인 딸기 생크림 홀케이크. 메리 크리스마스 쿠키와 촛불이 꽂혀 있어요.">
+        </picture>
 
         <div class="home-body">
           <p class="kicker" id="introKicker">A slow, warm moment</p>
@@ -65,6 +82,12 @@
             <ul class="cakes" id="cakeList">
               <li class="sk-row" aria-hidden="true"><div><span class="sk sk-w60"></span><span class="sk sk-w80 sk-sm"></span></div><span class="sk sk-price"></span></li>
             </ul>
+            <!-- 단면 사진: 구성 설명(초코 제누와즈, 생딸기)을 눈으로 보여 준다 -->
+            <figure class="cake-cut">
+              <img src="assets/cake-cut.webp" width="1200" height="800" loading="lazy" decoding="async"
+                alt="케이크를 자른 단면. 초코 제누와즈 사이사이에 생크림과 생딸기가 층층이 들어 있어요.">
+              <figcaption>자른 모습 · 초코 제누와즈와 생딸기</figcaption>
+            </figure>
             <div class="datebox" id="introDates" role="list" aria-label="날짜별 예약 현황">
               <div aria-hidden="true"><span class="sk sk-num"></span><span class="sk sk-w50 sk-sm"></span></div>
               <div aria-hidden="true"><span class="sk sk-num"></span><span class="sk sk-w50 sk-sm"></span></div>
@@ -241,8 +264,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="config.js?v=20261124a"></script>
-  <script src="mock/mock-api.js?v=20261124a"></script>
-  <script src="app.js?v=20261124a"></script>
+  <script src="config.js?v=20261126a"></script>
+  <script src="mock/mock-api.js?v=20261126a"></script>
+  <script src="app.js?v=20261126a"></script>
 </body>
 </html>

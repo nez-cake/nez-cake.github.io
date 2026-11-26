@@ -441,9 +441,16 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
    한 화면형: 사진 → 소개 → 케이크·날짜 → 주문서
    ========================================================= */
 .home-photo {
-  width: 100%; height: 40vh; min-height: 220px; max-height: 380px;
-  background: #e9dfcf center 48% / cover no-repeat; /* 가로로 긴 비율로 잘라 케이크가 가운데 */
+  display: block; width: 100%; height: 40vh; min-height: 220px; max-height: 380px;
+  overflow: hidden; background: #e9dfcf;
 }
+/* 13번 사진: 촛불(위)과 쿠키 글씨(가운데)가 잘리지 않게 세로 기준점을 조금 위로 */
+.home-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+
+/* 단면 사진 (케이크 이름·구성 바로 아래) */
+.cake-cut { margin: 16px 0 0; }
+.cake-cut img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; background: #ece4d8; }
+.cake-cut figcaption { margin-top: 8px; font-size: 13px; color: var(--ink-2); }
 .home-body { padding: 30px var(--gutter) 40px; }
 .notice-sec { margin: 6px 0 0; }
 .sub-title { margin: 0 0 10px; font-size: 18px; font-weight: 700; }
@@ -475,7 +482,8 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
    ========================================================= */
 @media (min-width: 1080px) {
   .home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 600px); }
-  .home-photo { position: sticky; top: 69px; height: calc(100vh - 69px); max-height: none; min-height: 0; background-position: center; }
+  .home-photo { position: sticky; top: 69px; height: calc(100vh - 69px); max-height: none; min-height: 0; }
+  .home-photo img { object-position: 50% 55%; } /* 12번 세로 사진: 촛불부터 케이크 받침까지 */
   .home-body { max-width: none; margin: 0; padding: 48px 56px 0; }
   .h-xl { font-size: 38px; }
   .summary {
