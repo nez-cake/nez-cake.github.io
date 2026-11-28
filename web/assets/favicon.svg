@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="180" height="180">
+  <!-- 파비콘: 종이색 바탕에 손그림 케이크(남색 선) + 촛불(소인 빨강). 작게 보여도 알아보게 선을 굵게 -->
+  <rect width="64" height="64" rx="14" fill="#fbf8f1"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="12" fill="none" stroke="#b4443a" stroke-width="2" stroke-dasharray="5 4"/>
+  <g fill="none" stroke="#2f4a6d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 33 C14 29 50 29 50 33 L50 48 C50 53 14 53 14 48 Z"/>
+    <path d="M14 34 C17 39 21 34 24 39 C27 34 30 39 32 35 C34 39 37 34 40 39 C43 34 47 39 50 34"/>
+    <path d="M32 29 L32 20"/>
+  </g>
+  <path d="M32 17 C35.5 12.5 33.5 9 32 6 C30 10 28.5 13 32 17Z" fill="#b4443a"/>
+</svg>

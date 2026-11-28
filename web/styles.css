@@ -431,7 +431,8 @@ body.has-bar .footer-in { padding-bottom: calc(var(--bar-h) + 30px + var(--safe-
 .footer-policy p { margin: 0; }
 #footRefund { max-width: 60ch; line-height: 1.75; white-space: pre-line; } /* 사장님 문구의 줄바꿈을 살린다 */
 .footer-label { color: var(--ink); font-weight: 700; }
-.footer-insta { display: inline-block; margin-top: 12px; color: var(--ink); padding: 6px 0; }
+.footer-insta { display: inline-block; margin-top: 6px; color: var(--ink); padding: 12px 0; } /* 누르는 영역 44px 이상 (글자 크기는 그대로) */
+.footer-biz a { padding: 13px 6px; margin: 0 -6px; } /* 전화번호 링크: 줄 위치는 그대로, 누르는 영역만 44px 이상 */
 
 /* ---------- 토스트, 복사 시트 ---------- */
 .toast {
